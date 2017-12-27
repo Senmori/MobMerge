@@ -1,0 +1,5 @@
+name: MobMerge
+version: ${project.version}
+main: net.senmori.mobmerge.MobMerge
+authors: [Senmori]
+description: A plugin to merge mobs that are within a certain radius

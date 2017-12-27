@@ -1,0 +1,10 @@
+default:
+  radius: 5
+  interval: 20
+  count: 256
+  color: dark_red
+mobs:
+  whitelist
+excluded-worlds:
+verbose: true
+
