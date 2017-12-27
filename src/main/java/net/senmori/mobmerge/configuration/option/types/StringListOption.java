@@ -1,17 +1,18 @@
 package net.senmori.mobmerge.configuration.option.types;
 
 import com.google.common.collect.Lists;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class StringListOption extends ListOption<String> {
-    private List<String> list = Lists.newArrayList();
+    protected List<String> list = Lists.newArrayList();
 
     public static StringListOption newOption(String key, List<String> defaultValue) {
         return new StringListOption(key, defaultValue);
     }
-
 
     protected StringListOption(String key, List<String> defaultValue) {
         super(key, defaultValue);
@@ -44,6 +45,8 @@ public class StringListOption extends ListOption<String> {
 
     @Override
     public void save(FileConfiguration config) {
-        config.set(getPath(), getValue());
+        List<String> save = Lists.newArrayList();
+        save.addAll(list.stream().distinct().collect(Collectors.toList())); // don't allow duplicates
+        config.set(getPath(), save);
     }
 }

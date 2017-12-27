@@ -1,13 +1,26 @@
+# Default options for merging mobs.
+# Radius: how many blocks in each direction to search for entities to merge
+# Interval: How often, in seconds, to search for entities
+# Count: The maximum number of entities to merge. -1 for infinite.
+# Color: The ChatColor to merged mobs names to for easier distinction.
 default:
   radius: 5
-  interval: 20
+  interval: 3
   count: 256
   color: dark_red
+# Which mobs to merge.
+# Use Minecraft names for these, not the names Bukkit's EntityType assigns them.
 mobs:
   - zombie
   - husk
   - donkey
+# Which worlds to not merge mobs in.
+# You can also use the UUID of a world.
 excluded-worlds:
   - world_nether
-verbose: false
+# Config update options
+# Update-Interval: How often, in seconds, the config should be automatically updated. -1 to disable.
+config:
+  update-interval: 5
+verbose: true
 

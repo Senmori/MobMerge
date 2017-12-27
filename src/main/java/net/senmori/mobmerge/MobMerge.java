@@ -20,16 +20,16 @@ public class MobMerge extends JavaPlugin {
         LOG = new PluginLogger(this);
         getConfig().options().copyDefaults(true);
         getConfig().options().copyHeader(true);
-        saveDefaultConfig();
+        this.saveDefaultConfig();
 
         config = getConfig();
-        configManager = new ConfigManager(config, new File(getDataFolder(), "config.yml"));
+        configManager = new ConfigManager(this, config, new File(getDataFolder(), "config.yml"));
 
 
     }
 
     @Override
     public void onDisable() {
-        configManager.saveConfig();
+        configManager.onDisable();
     }
 }

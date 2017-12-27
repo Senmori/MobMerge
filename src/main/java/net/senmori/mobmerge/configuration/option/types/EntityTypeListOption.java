@@ -62,7 +62,7 @@ public class EntityTypeListOption extends ListOption<EntityType> {
     @Override
     public void save(FileConfiguration config) {
         List<String> saved = Lists.newArrayList();
-        types.forEach(t -> {
+        types.stream().distinct().forEach(t -> {
             saved.add(t.getName());
         });
         config.set(getPath(), saved);
