@@ -1,13 +1,13 @@
-package net.senmori.mobmerge.configuration.options.types;
+package net.senmori.mobmerge.configuration.option.types;
 
 import com.google.common.collect.Lists;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
+import org.bukkit.plugin.PluginLogger;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 public class EntityTypeListOption extends ListOption<EntityType> {
     private List<EntityType> types = Lists.newArrayList();
@@ -31,33 +31,40 @@ public class EntityTypeListOption extends ListOption<EntityType> {
             types = Lists.newArrayList(); // reset array list
             return;
         }
-        Stream stream = value.stream().filter(t -> t instanceof EntityType);
-        if(stream.count() > 0) {
-            types.clear();
-            stream.forEach(c -> {
-                types.add((EntityType)c);
-            });
-        }
+        types.clear();
+        types.addAll(value);
     }
 
     @Override
     public boolean load(FileConfiguration config) {
         if(!config.contains(getPath())) return false;
-        if(!(config.get(getPath()) instanceof List)) return false; // it's not a list
 
         types.clear();
         List<String> list = config.getStringList(getPath());
-        for(String str : list) {
-            try {
-                //TODO: Implement conditions on entities when attempting to merge them
-                types.add(EntityType.fromName(str));
-            } catch (IllegalArgumentException e) {
-                if (ConfigManager.VERBOSE.getValue()) {
-                    MobMerge.LOG.warning("Failed to load entity with name " + str);
+        if(!list.isEmpty()) {
+            for(String str : list) {
+                try {
+                    //TODO: Implement conditions on entities when attempting to merge them
+                    EntityType type = EntityType.fromName(str);
+                    types.add(EntityType.fromName(str));
+                } catch (IllegalArgumentException e) {
+                    if (ConfigManager.VERBOSE.getValue()) {
+                        MobMerge.LOG.warning("Failed to load entity with name " + str);
+                    }
+                    return false;
                 }
-                return false;
             }
+            return true;
         }
-        return !types.isEmpty();
+        return false;
+    }
+
+    @Override
+    public void save(FileConfiguration config) {
+        List<String> saved = Lists.newArrayList();
+        types.forEach(t -> {
+            saved.add(t.getName());
+        });
+        config.set(getPath(), saved);
     }
 }

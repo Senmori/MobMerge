@@ -1,4 +1,4 @@
-package net.senmori.mobmerge.configuration.options;
+package net.senmori.mobmerge.configuration.option;
 
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -35,6 +35,8 @@ public abstract class ConfigOption<T> implements IConfigOption<T> {
     }
 
     public abstract boolean load(FileConfiguration config);
+
+    public abstract void save(FileConfiguration config);
 
     public String toString() {
         return "Path=" + getPath() + ", Value=" + getValue().toString();

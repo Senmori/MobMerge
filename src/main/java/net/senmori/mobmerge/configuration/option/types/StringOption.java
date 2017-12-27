@@ -1,6 +1,6 @@
-package net.senmori.mobmerge.configuration.options.types;
+package net.senmori.mobmerge.configuration.option.types;
 
-import net.senmori.mobmerge.configuration.options.ConfigOption;
+import net.senmori.mobmerge.configuration.option.ConfigOption;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class StringOption extends ConfigOption<String> {
@@ -23,5 +23,10 @@ public class StringOption extends ConfigOption<String> {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void save(FileConfiguration config) {
+        config.set(getPath(), getValue());
     }
 }

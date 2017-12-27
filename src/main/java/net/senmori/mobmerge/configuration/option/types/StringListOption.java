@@ -1,10 +1,9 @@
-package net.senmori.mobmerge.configuration.options.types;
+package net.senmori.mobmerge.configuration.option.types;
 
 import com.google.common.collect.Lists;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 public class StringListOption extends ListOption<String> {
     private List<String> list = Lists.newArrayList();
@@ -29,13 +28,8 @@ public class StringListOption extends ListOption<String> {
             list = Lists.newArrayList(); // reset array list
             return;
         }
-        Stream stream = value.stream().filter(t -> t instanceof String);
-        if(stream.count() > 0) {
-            list.clear();
-            stream.forEach(c -> {
-                list.add((String)c);
-            });
-        }
+        list.clear();
+        list.addAll(value);
     }
 
     @Override
@@ -46,5 +40,10 @@ public class StringListOption extends ListOption<String> {
         List<String> list = config.getStringList(getPath());
         this.list.addAll(list);
         return !this.list.isEmpty();
+    }
+
+    @Override
+    public void save(FileConfiguration config) {
+        config.set(getPath(), getValue());
     }
 }

@@ -1,4 +1,4 @@
-package net.senmori.mobmerge.configuration.options;
+package net.senmori.mobmerge.configuration.option;
 
 public class ConfigurationKey<T extends ConfigOption> {
     public static final ConfigurationKey NULL_KEY = ConfigurationKey.create("null", null);

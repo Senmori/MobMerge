@@ -1,4 +1,4 @@
-package net.senmori.mobmerge.configuration.options;
+package net.senmori.mobmerge.configuration.option;
 
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -12,4 +12,6 @@ public interface IConfigOption<T> {
     public void setValue(T value);
 
     public boolean load(FileConfiguration config);
+
+    public void save(FileConfiguration config);
 }

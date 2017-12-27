@@ -1,6 +1,6 @@
-package net.senmori.mobmerge.configuration.options.types;
+package net.senmori.mobmerge.configuration.option.types;
 
-import net.senmori.mobmerge.configuration.options.ConfigOption;
+import net.senmori.mobmerge.configuration.option.ConfigOption;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -32,5 +32,10 @@ public class NumberOption extends ConfigOption<Number> {
             }
         }
         return false;
+    }
+
+    @Override
+    public void save(FileConfiguration config) {
+        config.set(getPath(), getValue());
     }
 }

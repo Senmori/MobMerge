@@ -4,7 +4,10 @@ default:
   count: 256
   color: dark_red
 mobs:
-  whitelist
+  - zombie
+  - husk
+  - donkey
 excluded-worlds:
-verbose: true
+  - world_nether
+verbose: false
 

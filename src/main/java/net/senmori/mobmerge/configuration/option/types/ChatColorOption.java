@@ -1,8 +1,11 @@
-package net.senmori.mobmerge.configuration.options.types;
+package net.senmori.mobmerge.configuration.option.types;
 
-import net.senmori.mobmerge.configuration.options.ConfigOption;
+import net.senmori.mobmerge.MobMerge;
+import net.senmori.mobmerge.configuration.option.ConfigOption;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
+
+import java.util.Locale;
 
 public class ChatColorOption extends ConfigOption<ChatColor> {
 
@@ -22,22 +25,22 @@ public class ChatColorOption extends ConfigOption<ChatColor> {
         if(str == null || str.isEmpty()) {
             return false;
         }
-        ChatColor color = null;
-        if(str.startsWith("&") && str.length() >= 2) {
-           color = ChatColor.getByChar(str.charAt(1));
-           if(color != null) {
-               setValue(color);
-               return true;
-           }
-           return false; // not a valid color
-        } else {
-            try {
-                color = ChatColor.valueOf(config.getString(getPath()));
-                setValue(color);
-                return true;
-            } catch(IllegalArgumentException e) {
-                return false;
-            }
+        try {
+            ChatColor color = ChatColor.valueOf(config.getString(getPath()).toUpperCase());
+            setValue(color);
+            return getValue() == color;
+        } catch(IllegalArgumentException e) {
+            return false;
         }
+    }
+
+    @Override
+    public void save(FileConfiguration config) {
+        config.set(getPath(), getValue().name().toLowerCase(Locale.ENGLISH));
+    }
+
+    @Override
+    public String toString() {
+        return "Path=" + getPath() + ", Value=" + getValue().name().toLowerCase();
     }
 }

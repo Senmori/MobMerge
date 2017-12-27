@@ -1,7 +1,7 @@
-package net.senmori.mobmerge.configuration.options.types;
+package net.senmori.mobmerge.configuration.option.types;
 
 import com.google.common.collect.Lists;
-import net.senmori.mobmerge.configuration.options.ConfigOption;
+import net.senmori.mobmerge.configuration.option.ConfigOption;
 
 import java.util.List;
 
