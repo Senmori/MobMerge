@@ -1,6 +1,7 @@
 package net.senmori.mobmerge;
 
 import net.senmori.mobmerge.configuration.ConfigManager;
+import net.senmori.mobmerge.tasks.ProcessWorldsTask;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginLogger;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,6 +15,7 @@ public class MobMerge extends JavaPlugin {
 
     private FileConfiguration config;
     private ConfigManager configManager;
+    private ProcessWorldsTask processWorldsTask;
 
     @Override
     public void onEnable() {
@@ -25,7 +27,7 @@ public class MobMerge extends JavaPlugin {
         config = getConfig();
         configManager = new ConfigManager(this, config, new File(getDataFolder(), "config.yml"));
 
-
+        processWorldsTask = new ProcessWorldsTask(configManager);
     }
 
     @Override

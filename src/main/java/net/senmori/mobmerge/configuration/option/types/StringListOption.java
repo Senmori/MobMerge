@@ -39,8 +39,8 @@ public class StringListOption extends ListOption<String> {
         if(!(config.get(getPath()) instanceof List)) return false; // it's not a list
 
         List<String> list = config.getStringList(getPath());
-        this.list.addAll(list);
-        return !this.list.isEmpty();
+        this.list.addAll(list == null ? Lists.newArrayList() : list);
+        return true;
     }
 
     @Override
