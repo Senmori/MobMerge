@@ -1,6 +1,7 @@
 package net.senmori.mobmerge;
 
 import net.senmori.mobmerge.configuration.ConfigManager;
+import net.senmori.mobmerge.listener.EntityListener;
 import net.senmori.mobmerge.tasks.ProcessWorldsTask;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginLogger;
@@ -28,6 +29,7 @@ public class MobMerge extends JavaPlugin {
         configManager = new ConfigManager(this, config, new File(getDataFolder(), "config.yml"));
 
         processWorldsTask = new ProcessWorldsTask(configManager);
+        new EntityListener(configManager);
     }
 
     @Override

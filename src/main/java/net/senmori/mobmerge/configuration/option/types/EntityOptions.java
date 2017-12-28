@@ -44,9 +44,6 @@ public class EntityOptions extends ListOption<EntityType> {
         for(String type : types) {
             try {
                 EntityType eType = EntityType.fromName(type.toLowerCase());
-                if(!eType.isAlive()) {
-                    continue;
-                }
                 this.types.add(eType);
             }catch(IllegalArgumentException e) {
                 return false;
