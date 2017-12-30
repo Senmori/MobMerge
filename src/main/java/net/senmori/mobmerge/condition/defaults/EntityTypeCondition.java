@@ -1,5 +1,7 @@
 package net.senmori.mobmerge.condition.defaults;
 
+import net.senmori.mobmerge.MobMerge;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 
 /**
@@ -14,5 +16,10 @@ public class EntityTypeCondition extends DefaultEntityCondition<Boolean> {
     @Override
     public Boolean getRequiredValue() {
         return true;
+    }
+
+    @Override
+    public NamespacedKey getKey() {
+        return MobMerge.newKey("matchEntityType");
     }
 }

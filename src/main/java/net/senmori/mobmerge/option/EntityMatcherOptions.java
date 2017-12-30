@@ -130,6 +130,20 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
                 // condition node
                 ConfigurationSection condNode = typeSection.getConfigurationSection(node);
                 for(String key : condNode.getKeys(false)) {
+                    Condition condition = null;
+                    // try to parse key for a valid namespace
+                    NamespacedKey nameKey = MobMerge.newKey(key);
+                    MobMerge.debug("Found key in conditions " + key);
+                    condition = ConditionManager.getCondition(nameKey);
+                    if(condition == null) {
+                        if(ConfigManager.VERBOSE.getValue()) {
+                            MobMerge.LOG.info("Failed to find condition \'" + key + "\' in section " + condNode.getCurrentPath());
+                        }
+                        continue;
+                    }
+                    MobMerge.debug("Found condition \'" + condition.getKey().toString() + "\' with value \'" + condition.getRequiredValue().toString() + "\' for entity " + this.typeName);
+                    condition = condition.withRequiredValue(condNode.getString(key)); // adjust condition as needed
+                    this.conditions.add(condition);
                 }
             }
         }
@@ -154,7 +168,7 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
             for(Condition con : this.conditions) {
                 if(con instanceof DefaultEntityCondition) continue; // skip default conditions
                 NamespacedKey conditionKey = ConditionManager.getKey(con);
-                condSection.set(conditionKey.toString(), con.getRequiredValue().toString().toLowerCase());
+                condSection.set(conditionKey.toString().replaceAll(":", "_"), con.getRequiredValue().toString().toLowerCase());
             }
         }
     }
@@ -168,7 +182,6 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
         }
        for(Condition condition : getConditions()) {
            if(!condition.test(entity, other)) {
-               MobMerge.debug(condition.getClass().getSimpleName() + " failed test");
                return false;
            }
        }

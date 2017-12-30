@@ -1,13 +1,17 @@
 package net.senmori.mobmerge;
 
+import io.netty.util.internal.StringUtil;
+import net.senmori.mobmerge.action.EntityActionManager;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.ConditionManager;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.listener.EntityListener;
 import net.senmori.mobmerge.tasks.ProcessWorldsTask;
 import net.senmori.mobmerge.util.MobLogger;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -36,6 +40,7 @@ public class MobMerge extends JavaPlugin {
         configManager = new ConfigManager(this, config, new File(getDataFolder(), "config.yml"));
 
         processWorldsTask = new ProcessWorldsTask(configManager);
+        EntityActionManager.init();
         new EntityListener(configManager);
     }
 
@@ -46,6 +51,27 @@ public class MobMerge extends JavaPlugin {
 
     public static NamespacedKey newKey(String key) {
         return new NamespacedKey(INSTANCE, key);
+    }
+
+    public static NamespacedKey parseStringToKey(String string) {
+        if(StringUtil.isNullOrEmpty(string)) {
+            return null;
+        }
+        String[] result = new String[]{INSTANCE.getDescription().getName().toLowerCase(), string};
+        int index = string.indexOf("_"); // use _ because we can't use ':' in yaml; so EntityMatcherOptions changes it
+        if(index >= 0) {
+            result[1] = string.substring(index + 1, string.length());
+            if(index > 1) {
+                result[0] = string.substring(0, index);
+            }
+        }
+        String pluginName = result[0];
+        Plugin plugin = Bukkit.getPluginManager().getPlugin(pluginName);
+        if(plugin != null) {
+            return new NamespacedKey(plugin, result[1]);
+        } else {
+            return new NamespacedKey(result[0], result[1]);
+        }
     }
 
     public static void debug(String message) {

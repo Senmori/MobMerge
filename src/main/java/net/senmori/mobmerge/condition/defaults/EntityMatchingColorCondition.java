@@ -1,6 +1,8 @@
 package net.senmori.mobmerge.condition.defaults;
 
+import net.senmori.mobmerge.MobMerge;
 import org.bukkit.DyeColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.material.Colorable;
 
@@ -19,5 +21,10 @@ public class EntityMatchingColorCondition extends DefaultEntityCondition<Boolean
     @Override
     public Boolean getRequiredValue() {
         return true;
+    }
+
+    @Override
+    public NamespacedKey getKey() {
+        return MobMerge.newKey("matchEntityColor");
     }
 }

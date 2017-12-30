@@ -6,23 +6,18 @@
 default:
   radius: 5
   interval: 3
-  count: 256
+  count: 65536
   color: red
 # Which mobs to merge. This acts as a whitelist.
 # Use Minecraft names for these, not the names Bukkit's EntityType assigns them.
 # Use 'all' or '*' to indicate all mobs should be merged
 mobs:
   zombie:
-    count: -1
-    radius: 5
-    conditions:
-      respectAge: true
-      from-spawner: true
-      persistent: false
-  skeleton:
-    conditions:
-      from-spawner: true
-      persistent: false
+    radius:
+      ==: Vector
+      x: 5.0
+      y: 5.0
+      z: 5.0
 # Which worlds to not merge mobs in.
 # You can also use the UUID of a world.
 excluded-worlds:

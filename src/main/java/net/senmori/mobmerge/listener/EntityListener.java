@@ -1,11 +1,11 @@
 package net.senmori.mobmerge.listener;
 
+import net.senmori.mobmerge.action.death.EntityDeathAction;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.option.EntityOptionManager;
-import net.senmori.mobmerge.util.EntityUtil;
-import org.apache.commons.lang3.text.WordUtils;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
@@ -13,6 +13,7 @@ public class EntityListener implements Listener {
 
     private final ConfigManager manager;
     private final EntityOptionManager optionManager;
+    private final EntityDeathAction deathAction = new EntityDeathAction();
     public EntityListener(ConfigManager configManager) {
         this.manager = configManager;
         this.optionManager = configManager.getEntityOptionManager();
@@ -21,16 +22,8 @@ public class EntityListener implements Listener {
     }
 
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onEntityDeath(EntityDeathEvent event) {
-        LivingEntity entity = event.getEntity();
-
-        int count = EntityUtil.getEntityCount(entity, optionManager.getOptions().get(entity.getType()));
-        if(count > 1) {
-            LivingEntity clone = (LivingEntity)entity.getWorld().spawnEntity(entity.getLocation(), entity.getType());
-            if(count > 2) {
-                clone.setCustomName(ConfigManager.DEFAULT_COLOR.getValue() + Integer.toString(count -1) + " x " + WordUtils.capitalize(entity.getType().getName()));
-            }
-        }
+        deathAction.perform(event.getEntity(), (Entity)null, optionManager.getOptions().get(event.getEntity().getType()));
     }
 }

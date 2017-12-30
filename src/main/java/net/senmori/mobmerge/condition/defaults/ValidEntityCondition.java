@@ -1,5 +1,7 @@
 package net.senmori.mobmerge.condition.defaults;
 
+import net.senmori.mobmerge.MobMerge;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
@@ -21,5 +23,10 @@ public class ValidEntityCondition extends DefaultEntityCondition<Boolean> {
     @Override
     public Priority getPriority() {
         return Priority.DEFAULT;
+    }
+
+    @Override
+    public NamespacedKey getKey() {
+        return MobMerge.newKey("validEntity");
     }
 }

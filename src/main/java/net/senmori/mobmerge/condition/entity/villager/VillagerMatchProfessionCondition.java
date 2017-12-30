@@ -1,19 +1,12 @@
 package net.senmori.mobmerge.condition.entity.villager;
 
+import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.EntityCondition;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
 
-public class VillagerProfessionCondition extends EntityCondition<Villager.Profession> {
-
-    private Villager.Profession profession = null;
-
-    public static VillagerProfessionCondition newCondition(Villager.Profession profession) {
-        VillagerProfessionCondition cond = new VillagerProfessionCondition();
-        cond.profession = profession;
-        return cond;
-    }
-
+public class VillagerMatchProfessionCondition extends EntityCondition<Boolean> {
     @Override
     public boolean test(Entity entity, Entity other) {
         if(entity instanceof Villager && other instanceof Villager) {
@@ -30,7 +23,12 @@ public class VillagerProfessionCondition extends EntityCondition<Villager.Profes
     }
 
     @Override
-    public Villager.Profession getRequiredValue() {
-        return profession;
+    public Boolean getRequiredValue() {
+        return true;
+    }
+
+    @Override
+    public NamespacedKey getKey() {
+        return MobMerge.newKey("matchVillagerProfession");
     }
 }
