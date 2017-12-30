@@ -12,10 +12,17 @@ default:
 # Use Minecraft names for these, not the names Bukkit's EntityType assigns them.
 # Use 'all' or '*' to indicate all mobs should be merged
 mobs:
- - zombie
- - husk
- - donkey
- - villager
+  zombie:
+    count: -1
+    radius: 5
+    conditions:
+      respectAge: true
+      from-spawner: true
+      persistent: false
+  skeleton:
+    conditions:
+      from-spawner: true
+      persistent: false
 # Which worlds to not merge mobs in.
 # You can also use the UUID of a world.
 excluded-worlds:

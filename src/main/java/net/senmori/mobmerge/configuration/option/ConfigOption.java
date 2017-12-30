@@ -39,6 +39,6 @@ public abstract class ConfigOption<T> implements IConfigOption<T> {
     public abstract void save(FileConfiguration config);
 
     public String toString() {
-        return "Path=" + getPath() + ", Value=" + getValue().toString();
+        return "ConfigOption={Path=" + getPath() + ", Value=" + getValue().toString() + "}";
     }
 }

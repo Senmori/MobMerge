@@ -22,4 +22,8 @@ public class ConfigurationKey<T extends ConfigOption> {
     public Class<T> getType() {
         return clazz;
     }
+
+    public String toString() {
+        return "Key=" + name;
+    }
 }

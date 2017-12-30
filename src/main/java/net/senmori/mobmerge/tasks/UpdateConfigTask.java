@@ -10,6 +10,10 @@ public class UpdateConfigTask extends BukkitRunnable {
 
     public UpdateConfigTask(ConfigManager configManager) {
         this.manager = configManager;
+        reset();
+    }
+
+    public void reset() {
         this.period = ConfigManager.TICKS_PER_SECOND * ConfigManager.CONFIG_UPDATE_INTERVAL.getValue().intValue();
 
         this.runTaskTimer(manager.getPlugin(), period, period);
@@ -17,6 +21,7 @@ public class UpdateConfigTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        manager.updateConfig();
+        manager.saveConfig();
+        manager.loadConfig();
     }
 }

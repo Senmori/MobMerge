@@ -14,11 +14,11 @@ public class WorldListOption extends StringListOption {
         super(key, defaultValue);
     }
 
-    public boolean saveWorld(World world) {
-        return saveWorld(world, false);
+    public boolean excludeWorld(World world) {
+        return excludeWorld(world, false);
     }
 
-    public boolean saveWorld(World world, boolean useUUIDs) {
+    public boolean excludeWorld(World world, boolean useUUIDs) {
         return list.add( useUUIDs ? world.getUID().toString() : world.getName() );
     }
 

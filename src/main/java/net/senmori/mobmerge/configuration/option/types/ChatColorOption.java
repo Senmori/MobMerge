@@ -1,6 +1,5 @@
 package net.senmori.mobmerge.configuration.option.types;
 
-import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.configuration.option.ConfigOption;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -15,6 +14,14 @@ public class ChatColorOption extends ConfigOption<ChatColor> {
 
     protected ChatColorOption(String key, ChatColor defaultValue, Class<ChatColor> typeClass) {
         super(key, defaultValue, typeClass);
+    }
+
+
+    public void fromString(String color) {
+        ChatColor chat = ChatColor.valueOf(color.toUpperCase());
+        if(chat != null) {
+            setValue(chat);
+        }
     }
 
     @Override
@@ -41,6 +48,6 @@ public class ChatColorOption extends ConfigOption<ChatColor> {
 
     @Override
     public String toString() {
-        return "Path=" + getPath() + ", Value=" + getValue().name().toLowerCase();
+        return "ConfigOption={Path=" + getPath() + ", Value=" + getValue().name().toLowerCase() + "}";
     }
 }
