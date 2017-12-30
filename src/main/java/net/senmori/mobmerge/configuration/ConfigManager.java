@@ -50,7 +50,7 @@ public class ConfigManager {
     // Options
     public static final VectorOption RADIUS = registerOption(DEFAULT_RADIUS, VectorOption.newOption("default.radius", 5));
     public static final NumberOption INTERVAL = registerOption(DEFAULT_INTERVAL, NumberOption.newOption("default.interval", 5));
-    public static final NumberOption MAX_COUNT = registerOption(DEFAULT_COUNT, NumberOption.newOption("default.count", 256));
+    public static final NumberOption MAX_COUNT = registerOption(DEFAULT_COUNT, NumberOption.newOption("default.count", 65536));
     public static final NumberOption CONFIG_UPDATE_INTERVAL = registerOption(UPDATE_CONFIG_KEY, NumberOption.newOption("config.update-interval", 5));
     public static final ChatColorOption DEFAULT_COLOR = registerOption(DEFAULT_CHAT_COLOR, ChatColorOption.newOption("default.color", ChatColor.RED));
     public static final BooleanOption VERBOSE = registerOption(VERBOSE_KEY, BooleanOption.newOption("verbose", true));
