@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.ConditionManager;
-import net.senmori.mobmerge.condition.EntityCondition;
 import net.senmori.mobmerge.condition.defaults.DefaultEntityCondition;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.configuration.option.ConfigOption;
@@ -102,7 +101,7 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
                }
             }
             if(node.equals(RADIUS.getPath())) {
-                if(!( typeSection.get(RADIUS.getPath()) instanceof Vector) ) {
+                if( !(typeSection.get(RADIUS.getPath()) instanceof Vector) ) {
                     // treat it as a single integer
                     String numberStr = typeSection.getString(RADIUS.getPath());
                     if(NumberUtils.isNumber(numberStr)) {
@@ -116,15 +115,16 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
                             RADIUS.setValue(ConfigManager.RADIUS.getValue());
                         }
                     }
+                } else {
+                    // it's a vector
+                    Vector vector = typeSection.getVector(RADIUS.getPath());
+                    if(vector == null) {
+                        MobMerge.LOG.warning("Expected vector at mobs." + this.typeName + "." + node + ". Found: " + typeSection.get(node).getClass().getName());
+                        MobMerge.LOG.warning("Setting default radius for entity type " + this.entityType + " to " + RADIUS.getValue().toString());
+                        continue;
+                    }
+                    RADIUS.setValue(vector);
                 }
-                // it's a vector
-                Vector vector = typeSection.getVector(RADIUS.getPath());
-                if(vector == null) {
-                    MobMerge.LOG.warning("Expected vector at mobs." + this.typeName + "." + node + ". Found: " + typeSection.get(node).getClass().getName());
-                    MobMerge.LOG.warning("Setting default radius for entity type " + this.entityType + " to " + RADIUS.getValue().toString());
-                    continue;
-                }
-                RADIUS.setValue(vector);
             }
             if(typeSection.isConfigurationSection(node) && node.equals(ConfigManager.CONDITIONS_KEY.getName())) {
                 // condition node
@@ -142,7 +142,7 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
                         continue;
                     }
                     MobMerge.debug("Found condition \'" + condition.getKey().toString() + "\' with value \'" + condition.getRequiredValue().toString() + "\' for entity " + this.typeName);
-                    condition = condition.withRequiredValue(condNode.getString(key)); // adjust condition as needed
+                    condition = condition.setRequiredValue(condNode.getString(key)); // adjust condition as needed
                     this.conditions.add(condition);
                 }
             }
@@ -168,7 +168,7 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
             for(Condition con : this.conditions) {
                 if(con instanceof DefaultEntityCondition) continue; // skip default conditions
                 NamespacedKey conditionKey = ConditionManager.getKey(con);
-                condSection.set(conditionKey.toString().replaceAll(":", "_"), con.getRequiredValue().toString().toLowerCase());
+                condSection.set(conditionKey.getKey(), con.getRequiredValue().toString().toLowerCase());
             }
         }
     }

@@ -1,49 +1,30 @@
 package net.senmori.mobmerge.condition;
 
-import net.senmori.mobmerge.MobMerge;
-import net.senmori.mobmerge.condition.defaults.EntityAgeCondition;
-import net.senmori.mobmerge.condition.defaults.EntityMatchingColorCondition;
-import net.senmori.mobmerge.condition.defaults.EntityTypeCondition;
-import net.senmori.mobmerge.condition.defaults.ValidEntityCondition;
-import org.bukkit.DyeColor;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
 import org.bukkit.Keyed;
-import org.bukkit.entity.Ageable;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
-import org.bukkit.material.Colorable;
 
-import java.util.function.BiPredicate;
-
-public interface Condition<T, U> extends BiPredicate<T, T>, Keyed {
-
-    /**
-     * This condition tests if both entities are valid. (i.e. entity is not null, and {@link Entity#isValid()} returns true).<br>
-     */
-    ValidEntityCondition VALID_ENTITY = ConditionManager.registerDefaultCondition(new ValidEntityCondition());
-
-    /**
-     *  This conditions tests if the entities are of the same {@link org.bukkit.entity.EntityType}
-     */
-    EntityTypeCondition VALID_TYPE = ConditionManager.registerDefaultCondition(new EntityTypeCondition());
+/**
+ * Represents a condition which is applied to two entities of the same type.<br>
+ * <br>
+ * The required value can have different meanings depending on what is being tested on the entities.<br>
+ * For example, if two zombies are being compared, with a required value of true, then both zombies must have the
+ *     same age for the condition to return true.<br>
+ * As well, if two colorable entities(sheep) are being compared, with a required value of {@link org.bukkit.DyeColor#CYAN},
+ *      then both sheep must have the required color for the condition to return true.
+ */
+public interface Condition extends Keyed {
 
     /**
-     *  This conditions tests the both entities implements {@link Colorable} and are the same {@link DyeColor}
-     */
-    EntityMatchingColorCondition VALID_COLOR = ConditionManager.registerDefaultCondition(new EntityMatchingColorCondition());
-
-    /**
-     *  This condition tests that both entities implement {@link Ageable} and are adults. See {@link Ageable#isAdult()}.
-     */
-    EntityAgeCondition VALID_AGE = ConditionManager.registerDefaultCondition(new EntityAgeCondition());
-
-    /**
-     * Get a new instance of this Condition while attempting to parse the given value.<br>
-     * If the value cannot be parsed, this will return the old Condition.
+     * Set the required value of this Condition.
      * @param requiredValue the new value to parse
-     * @return the new Condition
+     * @return the modified Condition to chain calls.
+     * @throws IllegalArgumentException if the argument could not be parsed correctly.
      */
-    default Condition withRequiredValue(String requiredValue) {
-        return this;
-    }
+    public Condition setRequiredValue(String requiredValue);
 
     /**
      * This compares two objects of the same type.
@@ -51,13 +32,19 @@ public interface Condition<T, U> extends BiPredicate<T, T>, Keyed {
      * @param other the second object
      * @return true if the implementing class has compared the objects and found that they are equal in some manner.
      */
-    public boolean test(T first, T other);
+    public abstract boolean test(Entity first, Entity other);
 
     /**
      * Get the value this condition must meet/compared against to return true.<br>
      * @return the object the Condition must compare against
      */
-    public U getRequiredValue();
+    public abstract Object getRequiredValue();
+
+    /**
+     * Get the value this condition must meet/be compared against to return true.<br>
+     * @return the String version of the object the Condition must be compared against.
+     */
+    public String getStringValue();
 
     /**
      * Get the priority of this Condition.<br>
@@ -66,27 +53,28 @@ public interface Condition<T, U> extends BiPredicate<T, T>, Keyed {
      * Any implementing classes should not use negative values, as those are reserved for default conditions.
      * @return the condition's priority
      */
-    public Priority getPriority();
+    public abstract Priority getPriority();
 
-    /**
-     * Priority dictates in which order {@link Condition}s are ran.<br>
-     * Higher priorities will run first.
-     */
-    public enum Priority {
-        DEFAULT(-1),
-        HIGHEST(1),
-        HIGH(2),
-        NORMAL(3),
-        LOW(4),
-        LOWEST(5);
 
-        private final int priority;
-        private Priority(int priority) {
-            this.priority = priority;
+    abstract class Serializer<T extends Condition> {
+        private NamespacedKey name;
+        private Class<T> conditionClass;
+
+        protected Serializer(NamespacedKey name, Class<T> clazz) {
+            this.name = name;
+            this.conditionClass = clazz;
         }
 
-        public int getPriorityID() {
-            return priority;
+        public NamespacedKey getName() {
+            return this.name;
         }
+
+        public Class<T> getConditionClass() {
+            return this.conditionClass;
+        }
+
+        public abstract void serialize(JsonObject json, T type, JsonSerializationContext context);
+
+        public abstract T deserialize(JsonObject json, JsonDeserializationContext context);
     }
 }

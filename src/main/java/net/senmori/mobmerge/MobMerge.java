@@ -1,8 +1,6 @@
 package net.senmori.mobmerge;
 
 import io.netty.util.internal.StringUtil;
-import net.senmori.mobmerge.action.EntityActionManager;
-import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.ConditionManager;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.listener.EntityListener;
@@ -17,7 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
 public class MobMerge extends JavaPlugin {
-    private static final boolean DEBUG = Boolean.valueOf(System.getProperty("mobMergeDebug", "false"));
+    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("mobMergeDebug", "false"));
     public static MobLogger LOG;
     public static MobMerge INSTANCE;
 
@@ -40,7 +38,6 @@ public class MobMerge extends JavaPlugin {
         configManager = new ConfigManager(this, config, new File(getDataFolder(), "config.yml"));
 
         processWorldsTask = new ProcessWorldsTask(configManager);
-        EntityActionManager.init();
         new EntityListener(configManager);
     }
 
@@ -57,14 +54,7 @@ public class MobMerge extends JavaPlugin {
         if(StringUtil.isNullOrEmpty(string)) {
             return null;
         }
-        String[] result = new String[]{INSTANCE.getDescription().getName().toLowerCase(), string};
-        int index = string.indexOf("_"); // use _ because we can't use ':' in yaml; so EntityMatcherOptions changes it
-        if(index >= 0) {
-            result[1] = string.substring(index + 1, string.length());
-            if(index > 1) {
-                result[0] = string.substring(0, index);
-            }
-        }
+        String[] result = string.split(":");
         String pluginName = result[0];
         Plugin plugin = Bukkit.getPluginManager().getPlugin(pluginName);
         if(plugin != null) {
