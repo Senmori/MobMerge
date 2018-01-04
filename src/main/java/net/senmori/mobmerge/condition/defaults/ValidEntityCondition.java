@@ -1,23 +1,19 @@
 package net.senmori.mobmerge.condition.defaults;
 
 import net.senmori.mobmerge.MobMerge;
+import net.senmori.mobmerge.condition.Priority;
+import net.senmori.mobmerge.condition.type.BooleanCondition;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 
 /**
- * This condition checks if two entities are both valid.<br>
- * i.e. not null, and {@link Entity#isValid()} returns true.
+ * This condition checks if both entities are valid.<br>
+ * A valid entity is one whom is not null and {@link Entity#isValid()} returns true.
  */
-public class ValidEntityCondition extends DefaultEntityCondition<Boolean> {
+public class ValidEntityCondition extends BooleanCondition {
     @Override
     public boolean test(Entity entity, Entity other) {
-        return entity != null && other != null && entity.isValid() && other.isValid() && entity instanceof LivingEntity && other instanceof LivingEntity;
-    }
-
-    @Override
-    public Boolean getRequiredValue() {
-        return true;
+        return entity != null && other != null && entity.isValid() && other.isValid();
     }
 
     @Override
