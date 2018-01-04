@@ -6,33 +6,34 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 
 /**
- * This condition is a holder class for all conditions which take a boolean as a required value.
+ * This condition tests for a string value on two entities.<br>
+ * This could be a custom name, or scoreboard tags, or anything else than can be serialized as a string.
  */
-public abstract class BooleanCondition implements Condition {
-    private boolean value;
+public abstract class StringCondition implements Condition {
+    private String value = "";
 
-    public BooleanCondition() {
-        this.value = true;
+    public StringCondition() {
+        value = "";
     }
 
-    public BooleanCondition(boolean value) {
+    public StringCondition(String value) {
         this.value = value;
     }
 
     @Override
-    public BooleanCondition setRequiredValue(String requiredValue) {
-        value = Boolean.parseBoolean(requiredValue);
-        return this;
+    public Condition setRequiredValue(String requiredValue) {
+        this.value = requiredValue;
+        return null;
     }
 
     @Override
-    public Boolean getRequiredValue() {
+    public String getRequiredValue() {
         return value;
     }
 
     @Override
     public String getStringValue() {
-        return String.valueOf(getRequiredValue());
+        return value;
     }
 
     public abstract boolean test(Entity entity, Entity other);

@@ -1,12 +1,8 @@
-package net.senmori.mobmerge.condition.type;
+package net.senmori.mobmerge.condition.entity.colorable;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.Priority;
-import net.senmori.mobmerge.gson.JsonUtils;
 import org.bukkit.DyeColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -70,25 +66,5 @@ public class MatchDyeColorCondition implements Condition {
     @Override
     public NamespacedKey getKey() {
         return MobMerge.newKey("dyeColor");
-    }
-
-    public static class Serializer extends Condition.Serializer<MatchDyeColorCondition> {
-        public Serializer() {
-            super(MobMerge.newKey("dyeColor"), MatchDyeColorCondition.class);
-        }
-
-        @Override
-        public void serialize(JsonObject json, MatchDyeColorCondition type, JsonSerializationContext context) {
-           json.addProperty("value", type.getStringValue());
-        }
-
-        @Override
-        public MatchDyeColorCondition deserialize(JsonObject json, JsonDeserializationContext context) {
-            MatchDyeColorCondition condition = new MatchDyeColorCondition();
-            if(JsonUtils.hasField(json, "value")) {
-                condition.setRequiredValue(JsonUtils.getString(json, "value"));
-            }
-            return condition;
-        }
     }
 }

@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.ConditionManager;
-import net.senmori.mobmerge.condition.defaults.DefaultEntityCondition;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.configuration.option.ConfigOption;
 import net.senmori.mobmerge.configuration.option.ConfigurationKey;
@@ -166,7 +165,7 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
                 MobMerge.debug("Created empty conditions section for " + section.getCurrentPath());
             }
             for(Condition con : this.conditions) {
-                if(con instanceof DefaultEntityCondition) continue; // skip default conditions
+                if(ConditionManager.isDefaultCondition(con)) continue; // skip default conditions
                 NamespacedKey conditionKey = ConditionManager.getKey(con);
                 condSection.set(conditionKey.getKey(), con.getRequiredValue().toString().toLowerCase());
             }

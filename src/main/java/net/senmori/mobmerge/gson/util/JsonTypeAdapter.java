@@ -9,7 +9,7 @@ import com.google.gson.JsonSerializer;
 
 import java.lang.reflect.Type;
 
-public abstract class InheritanceAdapter<T> implements JsonSerializer<T>, JsonDeserializer<T> {
+public abstract class JsonTypeAdapter<T> implements JsonSerializer<T>, JsonDeserializer<T> {
 
     @Override
     public abstract JsonElement serialize(T t, Type type, JsonSerializationContext jsonSerializationContext);

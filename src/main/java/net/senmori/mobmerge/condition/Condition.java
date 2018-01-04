@@ -24,7 +24,9 @@ public interface Condition extends Keyed {
      * @return the modified Condition to chain calls.
      * @throws IllegalArgumentException if the argument could not be parsed correctly.
      */
-    public Condition setRequiredValue(String requiredValue);
+    default Condition setRequiredValue(String requiredValue) {
+        return this;
+    }
 
     /**
      * This compares two objects of the same type.
@@ -41,10 +43,12 @@ public interface Condition extends Keyed {
     public abstract Object getRequiredValue();
 
     /**
-     * Get the value this condition must meet/be compared against to return true.<br>
+     * Get the String version of the value this condition must meet/be compared against to return true.<br>
      * @return the String version of the object the Condition must be compared against.
      */
-    public String getStringValue();
+    default String getStringValue() {
+        return String.valueOf(getRequiredValue());
+    }
 
     /**
      * Get the priority of this Condition.<br>

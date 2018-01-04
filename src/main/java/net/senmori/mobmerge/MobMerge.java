@@ -34,7 +34,6 @@ public class MobMerge extends JavaPlugin {
         this.saveDefaultConfig();
 
         config = getConfig();
-        ConditionManager.init();
         configManager = new ConfigManager(this, config, new File(getDataFolder(), "config.yml"));
 
         processWorldsTask = new ProcessWorldsTask(configManager);
