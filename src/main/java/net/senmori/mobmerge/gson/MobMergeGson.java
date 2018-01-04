@@ -2,7 +2,7 @@ package net.senmori.mobmerge.gson;
 
 import com.google.gson.GsonBuilder;
 import net.senmori.mobmerge.condition.Condition;
-import net.senmori.mobmerge.gson.serializers.ConditionAdapter;
+import net.senmori.mobmerge.gson.serializers.ConditionTypeAdapter;
 import net.senmori.mobmerge.gson.strategy.DefaultExclusionStrategy;
 
 public final class MobMergeGson {
@@ -13,6 +13,6 @@ public final class MobMergeGson {
                 .setPrettyPrinting()
                 .serializeNulls()
                 .setExclusionStrategies(new DefaultExclusionStrategy())
-                .registerTypeAdapter(Condition.class, new ConditionAdapter());
+                .registerTypeAdapter(Condition.class, new ConditionTypeAdapter());
     }
 }
