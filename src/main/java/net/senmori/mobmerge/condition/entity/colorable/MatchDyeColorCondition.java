@@ -27,6 +27,7 @@ public class MatchDyeColorCondition implements Condition {
     @Override
     public MatchDyeColorCondition setRequiredValue(String requiredValue) {
         if(Boolean.parseBoolean(requiredValue)) {
+            color = null;
             return this; // value is 'true', so we don't match a specific color
         }
         try {

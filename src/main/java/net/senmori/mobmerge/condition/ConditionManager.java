@@ -4,8 +4,11 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.annotation.Excluded;
+import net.senmori.mobmerge.condition.defaults.EntityAgeCondition;
+import net.senmori.mobmerge.condition.defaults.EntityColorCondition;
+import net.senmori.mobmerge.condition.defaults.EntityTypeCondition;
+import net.senmori.mobmerge.condition.defaults.ValidEntityCondition;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.NamespacedKey;
 
@@ -14,10 +17,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This class handles the registration of {@link Condition}s.
+ */
 public final class ConditionManager {
     private static final BiMap<NamespacedKey, Condition> CONDITIONS = HashBiMap.create();
     private static final BiMap<NamespacedKey, Condition> DEFAULT_CONDITIONS = HashBiMap.create();
     private static final Map<NamespacedKey, Class<? extends Condition>> CLASS_MAP = Maps.newHashMap();
+
+    public static void initDefaults() {
+        registerDefaultCondition(new ValidEntityCondition());
+        registerDefaultCondition(new EntityTypeCondition());
+        registerDefaultCondition(new EntityColorCondition());
+        registerDefaultCondition(new EntityAgeCondition());
+    }
 
     /**
      * Register a new condition.
@@ -119,5 +132,13 @@ public final class ConditionManager {
      */
     public static List<Condition> getDefaultConditions() {
         return sortConditionsByPriority(Lists.newArrayList(DEFAULT_CONDITIONS.values())); // sort them
+    }
+
+    /**
+     * Gets a copy of all registered, non-default conditions, sorted by their {@link Priority}
+     * @return a sorted copy of all registered, non-default conditions.
+     */
+    public static List<Condition> getConditions() {
+        return sortConditionsByPriority(Lists.newArrayList(CONDITIONS.values()));
     }
 }
