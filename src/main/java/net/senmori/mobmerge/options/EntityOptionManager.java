@@ -1,4 +1,4 @@
-package net.senmori.mobmerge.option;
+package net.senmori.mobmerge.options;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -8,6 +8,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 
+import java.util.List;
 import java.util.Map;
 
 public final class EntityOptionManager {
@@ -25,15 +26,28 @@ public final class EntityOptionManager {
             MobMerge.LOG.info("Expected section at key \'" + path + "\'. Found null");
             return false;
         }
+        List<String> defaultTypes = ConfigManager.DEFAULT_MOBS.getValue();
+        MobMerge.debug("Default Entity Types: " + defaultTypes.toString());
+        for(String types : defaultTypes) {
+            EntityType entityType = EntityType.fromName(types);
+            if(entityType == null || ! entityType.isAlive()) {
+                if(ConfigManager.VERBOSE.getValue()) {
+                    MobMerge.LOG.warning("Invalid entity type registered. Expected a valid living entity. Found " + types);
+                }
+                continue;
+            }
+            EntityMatcherOptions options = matcherOptions.getOrDefault(entityType, new EntityMatcherOptions(getConfigManager(), entityType));
+            matcherOptions.put(entityType, options);
+        }
         for(String key : section.getKeys(false)) {
-
+            if((section.getCurrentPath() + "." + key).equals(ConfigManager.DEFAULT_MOBS.getPath())) continue; // mobs.default == mobs.default
             EntityType entityType = EntityType.fromName(key);
             if(entityType == null || !entityType.isAlive()) {
                 MobMerge.debug("Invalid entity type registered: " + key);
                 continue; // it's not a valid entity; ignore it.
             }
             if(section.isConfigurationSection(key)) {
-                EntityMatcherOptions options = new EntityMatcherOptions(getConfigManager(), entityType);
+                EntityMatcherOptions options = matcherOptions.getOrDefault(entityType, new EntityMatcherOptions(getConfigManager(), entityType));
                 if(!options.load(config)) {
                     if(ConfigManager.VERBOSE.getValue()) {
                         MobMerge.LOG.warning("Failed to load entity matcher options for entity type: " + entityType);

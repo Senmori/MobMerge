@@ -1,17 +1,20 @@
-package net.senmori.mobmerge.option;
+package net.senmori.mobmerge.options;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.sun.istack.internal.NotNull;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.ConditionManager;
+import net.senmori.mobmerge.condition.Priority;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.configuration.option.ConfigOption;
 import net.senmori.mobmerge.configuration.option.ConfigurationKey;
 import net.senmori.mobmerge.configuration.option.types.ChatColorOption;
 import net.senmori.mobmerge.configuration.option.types.NumberOption;
+import net.senmori.mobmerge.configuration.option.types.StringListOption;
 import net.senmori.mobmerge.configuration.option.types.VectorOption;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.ChatColor;
@@ -26,16 +29,15 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiPredicate;
 
-public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
+public class EntityMatcherOptions {
     private final EntityType entityType;
     private final String typeName;
     private final Map<ConfigurationKey, ConfigOption> options = Maps.newHashMap();
     private final ConfigManager configManager;
     private final EntityOptionManager optionManager;
 
-    // option keys
+    // options keys
     private final ConfigurationKey RADIUS_KEY = ConfigurationKey.create("Mob Radius", VectorOption.class);
     private final ConfigurationKey COUNT_KEY = ConfigurationKey.create("Mob Max Count", NumberOption.class);
     private final ConfigurationKey CHAT_COLOR_KEY = ConfigurationKey.create("Mob Chat Color", ChatColorOption.class);
@@ -55,18 +57,40 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
         addOption(CHAT_COLOR_KEY, CHAT_COLOR);
         this.configManager = configManager;
         this.optionManager = configManager.getEntityOptionManager();
+        conditions.addAll(ConditionManager.getDefaultConditions());
     }
 
     public Vector getRadius() {
         return RADIUS.getValue();
     }
 
+    public boolean setRadius(@NotNull Vector vector) {
+        Vector old = getRadius();
+        RADIUS.setValue(vector);
+        return !old.equals(getRadius());
+    }
+
     public int getMaxCount() {
         return COUNT.getValue().intValue() < 0 ? Integer.MAX_VALUE : COUNT.getValue().intValue();
     }
 
+    public boolean setMaxCount(int maxCount) {
+        if(maxCount < 0) return false;
+        if(maxCount == getMaxCount()) return false;
+        int old = getMaxCount();
+        COUNT.setValue(maxCount);
+        return old != getMaxCount();
+    }
+
     public ChatColor getChatColor() {
         return CHAT_COLOR.getValue();
+    }
+
+    public boolean setChatColor(ChatColor color) {
+        if(color == getChatColor()) return false;
+        ChatColor old = getChatColor();
+        CHAT_COLOR.setValue(color);
+        return old != getChatColor();
     }
 
     public <T extends ConfigOption> boolean addOption(ConfigurationKey key, T option) {
@@ -131,8 +155,7 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
                 for(String key : condNode.getKeys(false)) {
                     Condition condition = null;
                     // try to parse key for a valid namespace
-                    NamespacedKey nameKey = MobMerge.newKey(key);
-                    MobMerge.debug("Found key in conditions " + key);
+                    NamespacedKey nameKey = MobMerge.newKey(key.replaceAll("\"", "")); // remove double quotes
                     condition = ConditionManager.getCondition(nameKey);
                     if(condition == null) {
                         if(ConfigManager.VERBOSE.getValue()) {
@@ -141,8 +164,7 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
                         continue;
                     }
                     MobMerge.debug("Found condition \'" + condition.getKey().toString() + "\' with value \'" + condition.getRequiredValue().toString() + "\' for entity " + this.typeName);
-                    condition = condition.setRequiredValue(condNode.getString(key)); // adjust condition as needed
-                    this.conditions.add(condition);
+                    this.conditions.add(condition.setRequiredValue(condNode.getString(key)));
                 }
             }
         }
@@ -167,32 +189,45 @@ public class EntityMatcherOptions implements BiPredicate<Entity, Entity> {
             for(Condition con : this.conditions) {
                 if(ConditionManager.isDefaultCondition(con)) continue; // skip default conditions
                 NamespacedKey conditionKey = ConditionManager.getKey(con);
-                condSection.set(conditionKey.getKey(), con.getRequiredValue().toString().toLowerCase());
+                if(conditionKey == null || conditionKey.toString().isEmpty()) {
+                    if(ConfigManager.VERBOSE.getValue()) {
+                        MobMerge.LOG.warning("Unknown condition \'" + con.getClass().getName() + "\'. Could not find matching NamespacedKey.");
+                    }
+                    continue;
+                }
+                // we have to surround namespaced keys with double quotes because yaml is awesome like that!
+                condSection.set("\"" + conditionKey.toString() + "\"", con.getStringValue());
             }
         }
     }
 
-    @Override
     public boolean test(Entity entity, Entity other) {
-        for(Condition defaultCondition : ConditionManager.getDefaultConditions()) {
-            if(!defaultCondition.test(entity, other)) {
+        for(Condition cond : getConditions()) {
+            if(!cond.test(entity, other)) {
+                if(ConfigManager.VERBOSE.getValue()) {
+                    MobMerge.LOG.warning("Condition \'" + cond.getClass().getName() + "\' failed. Required value (" + cond.getStringValue() + ")");
+                }
                 return false;
             }
         }
-       for(Condition condition : getConditions()) {
-           if(!condition.test(entity, other)) {
-               return false;
-           }
-       }
-       return true;
+        return true;
     }
 
 
+    /**
+     * Get an immutable copy of all {@link ConfigOption}s for this entity type.
+     * @return an immutable copy of config options.
+     */
     public Map<ConfigurationKey, ConfigOption> getOptions() {
         return ImmutableMap.copyOf(this.options);
     }
 
+    /**
+     * Get an immutable copy of the conditions for this entity type.<br>
+     * These conditions are sorted by their {@link Priority}.
+     * @return an immutable copy of the conditions
+     */
     public List<Condition> getConditions() {
-        return ImmutableList.copyOf(this.conditions);
+        return ImmutableList.copyOf(ConditionManager.sortConditionsByPriority(this.conditions));
     }
 }

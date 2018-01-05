@@ -1,29 +1,23 @@
 package net.senmori.mobmerge.tasks;
 
 import com.google.common.collect.Lists;
-import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.configuration.ConfigManager;
-import net.senmori.mobmerge.option.EntityMatcherOptions;
-import net.senmori.mobmerge.option.EntityOptionManager;
+import net.senmori.mobmerge.options.EntityMatcherOptions;
+import net.senmori.mobmerge.options.EntityOptionManager;
 import net.senmori.mobmerge.util.EntityUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.material.Colorable;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class ProcessWorldsTask extends BukkitRunnable {
-    private final Pattern CUSTOM_NAME_PATTERN = Pattern.compile("\\d+");
+    public static final String MERGED_ENTITY_DEATH_TAG = "merged";
 
     private final JavaPlugin plugin;
     private final ConfigManager manager;
@@ -72,6 +66,7 @@ public class ProcessWorldsTask extends BukkitRunnable {
                 int newCount = originalCount + removedCount;
                 ((LivingEntity)entity).setCustomName(options.getChatColor() + String.valueOf(newCount));
                 ((LivingEntity)entity).setCustomNameVisible(true);
+                toRemove.forEach(e -> e.addScoreboardTag(MERGED_ENTITY_DEATH_TAG));
                 toRemove.forEach(Entity::remove);
                 toRemove.clear();
             }

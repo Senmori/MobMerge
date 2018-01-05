@@ -1,4 +1,4 @@
-package net.senmori.mobmerge.condition.entity.colorable;
+package net.senmori.mobmerge.condition.entity;
 
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;

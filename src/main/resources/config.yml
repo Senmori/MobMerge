@@ -12,6 +12,10 @@ default:
 # Use Minecraft names for these, not the names Bukkit's EntityType assigns them.
 # Use 'all' or '*' to indicate all mobs should be merged
 mobs:
+  default:
+    - zombie
+    - skeleton
+    - creeper
   zombie:
     radius:
       ==: Vector
@@ -25,6 +29,7 @@ excluded-worlds:
 # Config update options
 # Update-Interval: How often, in seconds, the config should be automatically updated. -1 to disable.
 config:
-  update-interval: 5
+  update-interval: -1
+  use-json: false
 verbose: true
 

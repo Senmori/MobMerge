@@ -9,19 +9,11 @@ import java.util.Locale;
 public class ChatColorOption extends ConfigOption<ChatColor> {
 
     public static ChatColorOption newOption(String key, ChatColor defaultValue) {
-        return new ChatColorOption(key, defaultValue, ChatColor.class);
+        return new ChatColorOption(key, defaultValue);
     }
 
-    protected ChatColorOption(String key, ChatColor defaultValue, Class<ChatColor> typeClass) {
-        super(key, defaultValue, typeClass);
-    }
-
-
-    public void fromString(String color) {
-        ChatColor chat = ChatColor.valueOf(color.toUpperCase());
-        if(chat != null) {
-            setValue(chat);
-        }
+    protected ChatColorOption(String key, ChatColor defaultValue) {
+        super(key, defaultValue, ChatColor.class);
     }
 
     @Override

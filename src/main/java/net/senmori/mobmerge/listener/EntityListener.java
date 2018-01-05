@@ -1,7 +1,7 @@
 package net.senmori.mobmerge.listener;
 
 import net.senmori.mobmerge.configuration.ConfigManager;
-import net.senmori.mobmerge.option.EntityOptionManager;
+import net.senmori.mobmerge.options.EntityOptionManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;

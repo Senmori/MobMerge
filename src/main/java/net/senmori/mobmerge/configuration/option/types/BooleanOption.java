@@ -6,11 +6,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class BooleanOption extends ConfigOption<Boolean> {
 
     public static BooleanOption newOption(String key, boolean defaultValue) {
-        return new BooleanOption(key, defaultValue, Boolean.class);
+        return new BooleanOption(key, defaultValue);
     }
 
-    protected BooleanOption(String key, Boolean defaultValue, Class<Boolean> typeClass) {
-        super(key, defaultValue, typeClass);
+    protected BooleanOption(String key, Boolean defaultValue) {
+        super(key, defaultValue, Boolean.class);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package net.senmori.mobmerge.configuration.option.types;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -21,6 +22,17 @@ public class StringListOption extends ListOption<String> {
     @Override
     public List<String> getValue() {
         return list;
+    }
+
+    @Override
+    public void setValue(List list) {
+        this.list.clear();
+        list.forEach(obj -> {
+            if(!(obj instanceof String)) {
+                return;
+            }
+            this.list.add((String)obj);
+        });
     }
 
     @Override

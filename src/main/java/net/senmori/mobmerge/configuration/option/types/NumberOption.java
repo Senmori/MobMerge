@@ -10,11 +10,11 @@ import java.text.ParseException;
 public class NumberOption extends ConfigOption<Number> {
 
     public static NumberOption newOption(String key, Number defaultValue) {
-        return new NumberOption(key, defaultValue, Number.class);
+        return new NumberOption(key, defaultValue);
     }
 
-    protected NumberOption(String key, Number defaultValue, Class<Number> typeClass) {
-        super(key, defaultValue, typeClass);
+    protected NumberOption(String key, Number defaultValue) {
+        super(key, defaultValue, Number.class);
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 
 /**
- * This condition tests if two entities
+ * This condition tests if two entities have a specific color, or if the color is null, if both entities are the same color
  */
 public abstract class ColorableCondition implements Condition {
     private DyeColor color = null;
@@ -17,6 +17,7 @@ public abstract class ColorableCondition implements Condition {
     @Override
     public Condition setRequiredValue(String requiredValue) {
         if(Boolean.parseBoolean(requiredValue)) {
+            color = null;
             return this; // value is 'true', meaning don't match a specific color
         }
         try {

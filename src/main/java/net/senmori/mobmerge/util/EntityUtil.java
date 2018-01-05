@@ -1,6 +1,6 @@
 package net.senmori.mobmerge.util;
 
-import net.senmori.mobmerge.option.EntityMatcherOptions;
+import net.senmori.mobmerge.options.EntityMatcherOptions;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Entity;

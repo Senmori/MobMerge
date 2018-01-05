@@ -33,8 +33,7 @@ public class MobMerge extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         this.saveDefaultConfig();
 
-        config = getConfig();
-        configManager = new ConfigManager(this, config, new File(getDataFolder(), "config.yml"));
+        configManager = new ConfigManager(this, new File(getDataFolder(), "config.yml"));
 
         processWorldsTask = new ProcessWorldsTask(configManager);
         new EntityListener(configManager);

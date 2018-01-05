@@ -6,7 +6,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 
 /**
- * This condition is a holder class for all conditions which take a boolean as a required value.
+ * This condition is a holder class for all conditions which compare a boolean value on two entities.
  */
 public abstract class BooleanCondition implements Condition {
     private boolean value;

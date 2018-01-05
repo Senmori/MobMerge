@@ -5,7 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.util.Vector;
 
 /**
- * Represents a config option that accepts a {@link Vector}.
+ * Represents a config options that accepts a {@link Vector}.
  */
 public class VectorOption extends ConfigOption<Vector> {
 
