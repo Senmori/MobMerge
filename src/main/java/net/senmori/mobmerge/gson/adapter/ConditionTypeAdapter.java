@@ -1,4 +1,4 @@
-package net.senmori.mobmerge.gson.serializers;
+package net.senmori.mobmerge.gson.adapter;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
