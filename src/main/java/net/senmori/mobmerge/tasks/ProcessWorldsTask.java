@@ -4,7 +4,6 @@ import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.options.EntityMatcherOptions;
 import net.senmori.mobmerge.options.EntityOptionManager;
-import net.senmori.mobmerge.util.EntityUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -29,7 +28,7 @@ public class ProcessWorldsTask extends BukkitRunnable {
         this.optionManager = manager.getEntityOptionManager();
         this.period = ConfigManager.TICKS_PER_SECOND * ConfigManager.INTERVAL.getValue().intValue();
 
-        this.runTaskTimer(plugin, 0L, period);
+        this.runTaskTimer(plugin, period, period);
     }
 
     @Override
@@ -41,7 +40,9 @@ public class ProcessWorldsTask extends BukkitRunnable {
     }
 
     private void processWorld(World world) {
-        for(Entity entity : world.getEntities()) {
+        for(LivingEntity entity : world.getLivingEntities()) {
+            if(!entity.getWorld().getChunkAt(entity.getLocation()).isLoaded()) continue; // got an entity in a lazy/unloaded chunk
+            if(!entity.getType().isAlive()) continue; // ignore non-living entities
             if(!optionManager.getOptions().containsKey(entity.getType())) {
                 continue; // not merging this entity; ignore it
             }
