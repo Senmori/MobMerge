@@ -27,11 +27,10 @@ public final class EntityOptionManager {
             return false;
         }
         List<String> defaultTypes = ConfigManager.DEFAULT_MOBS.getValue();
-        MobMerge.debug("Default Entity Types: " + defaultTypes.toString());
         for(String types : defaultTypes) {
             EntityType entityType = EntityType.fromName(types);
-            if(entityType == null || ! entityType.isAlive()) {
-                if(ConfigManager.VERBOSE.getValue()) {
+            if(entityType == null || !entityType.isAlive()) {
+                if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
                     MobMerge.LOG.warning("Invalid entity type registered. Expected a valid living entity. Found " + types);
                 }
                 continue;
@@ -43,13 +42,15 @@ public final class EntityOptionManager {
             if((section.getCurrentPath() + "." + key).equals(ConfigManager.DEFAULT_MOBS.getPath())) continue; // mobs.default == mobs.default
             EntityType entityType = EntityType.fromName(key);
             if(entityType == null || !entityType.isAlive()) {
-                MobMerge.debug("Invalid entity type registered: " + key);
+                if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
+                    MobMerge.LOG.warning("Invalid entity type registered: " + key);
+                }
                 continue; // it's not a valid entity; ignore it.
             }
             if(section.isConfigurationSection(key)) {
                 EntityMatcherOptions options = matcherOptions.getOrDefault(entityType, new EntityMatcherOptions(getConfigManager(), entityType));
                 if(!options.load(config)) {
-                    if(ConfigManager.VERBOSE.getValue()) {
+                    if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
                         MobMerge.LOG.warning("Failed to load entity matcher options for entity type: " + entityType);
                     }
                 } else {
@@ -58,6 +59,15 @@ public final class EntityOptionManager {
             }
         }
         return true;
+    }
+
+    /**
+     * Get the matching {@link EntityMatcherOptions} for this given entity type.
+     * @param type the entity type to search for
+     * @return the matching {@link EntityMatcherOptions}, or a new instance if none exists.
+     */
+    public EntityMatcherOptions getOptionsFor(EntityType type) {
+        return this.matcherOptions.getOrDefault(type, new EntityMatcherOptions(this.getConfigManager(), type));
     }
 
     public Map<EntityType, EntityMatcherOptions> getOptions() {

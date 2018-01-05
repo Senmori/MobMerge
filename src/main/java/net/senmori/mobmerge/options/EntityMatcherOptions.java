@@ -29,6 +29,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class EntityMatcherOptions {
     private final EntityType entityType;
@@ -58,6 +59,10 @@ public class EntityMatcherOptions {
         this.configManager = configManager;
         this.optionManager = configManager.getEntityOptionManager();
         conditions.addAll(ConditionManager.getDefaultConditions());
+    }
+
+    public EntityType getEntityType() {
+        return this.entityType;
     }
 
     public Vector getRadius() {
@@ -91,6 +96,19 @@ public class EntityMatcherOptions {
         ChatColor old = getChatColor();
         CHAT_COLOR.setValue(color);
         return old != getChatColor();
+    }
+
+    public int getCount(Entity entity) {
+        if(entity.getType() != this.getEntityType()) return -1;
+        String customName = entity.getCustomName();
+        if(customName != null && customName.startsWith(this.getChatColor().toString())) {
+            try {
+                return Integer.parseInt(ChatColor.stripColor(customName));
+            } catch(NumberFormatException e) {
+                return 1;
+            }
+        }
+        return 1;
     }
 
     public <T extends ConfigOption> boolean addOption(ConfigurationKey key, T option) {
@@ -220,6 +238,42 @@ public class EntityMatcherOptions {
      */
     public Map<ConfigurationKey, ConfigOption> getOptions() {
         return ImmutableMap.copyOf(this.options);
+    }
+
+    /**
+     * Add a condition.
+     * @param condition the condition to add
+     * @return true if the condition was successfully added.
+     */
+    public boolean addCondition(Condition condition) {
+        return this.conditions.add(condition);
+    }
+
+    /**
+     * Remove a condition with a given {@link NamespacedKey}.<br>
+     * Default conditions can never be removed.
+     * @param key the key of the condition that should be removed
+     * @return true if the condition was successfully removed.
+     */
+    public boolean removeCondition(NamespacedKey key) {
+        return this.conditions
+                       .stream()
+                       .filter(condition -> !ConditionManager.isDefaultCondition(condition))
+                       .filter(condition -> condition.getKey().equals(key))
+                       .findFirst()
+                       .map(condition -> this.conditions.remove(condition))
+                       .orElse(false);
+    }
+
+    /**
+     * Remove a condition.<br>
+     * Default conditions can never be removed.
+     * @param condition the condition to remove
+     * @return true if the condition was successfully removed.
+     */
+    public boolean removeCondition(Condition condition) {
+        if(ConditionManager.isDefaultCondition(condition)) return false;
+        return this.conditions.remove(condition);
     }
 
     /**

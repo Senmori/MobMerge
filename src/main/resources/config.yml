@@ -8,6 +8,7 @@ default:
   interval: 3
   count: 65536
   color: red
+  tag: mergedEntity
 # Which mobs to merge. This acts as a whitelist.
 # Use Minecraft names for these, not the names Bukkit's EntityType assigns them.
 # Use 'all' or '*' to indicate all mobs should be merged

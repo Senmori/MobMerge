@@ -1,6 +1,6 @@
 package net.senmori.mobmerge.tasks;
 
-import com.google.common.collect.Lists;
+import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.options.EntityMatcherOptions;
 import net.senmori.mobmerge.options.EntityOptionManager;
@@ -13,11 +13,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class ProcessWorldsTask extends BukkitRunnable {
-    public static final String MERGED_ENTITY_DEATH_TAG = "merged";
+    private static final Pattern EQUALS = Pattern.compile("=");
 
     private final JavaPlugin plugin;
     private final ConfigManager manager;
@@ -48,27 +47,34 @@ public class ProcessWorldsTask extends BukkitRunnable {
             }
             EntityMatcherOptions options = optionManager.getOptions().get(entity.getType());
             Vector radius = options.getRadius();
-            int originalCount = EntityUtil.getEntityCount(entity, options);
+            int originalCount = options.getCount(entity);
             int removedCount = 0;
-            List<Entity> toRemove = Lists.newArrayList();
             for(Entity other : entity.getNearbyEntities(radius.getX(), radius.getY(), radius.getZ())) {
                 if(other.getType() != entity.getType()) continue;
                 if(options.test(entity, other)) {
                     // merge mobs
-                    int otherCount = EntityUtil.getEntityCount(other, optionManager.getOptions().get(other.getType()));
-                    if(originalCount + removedCount + otherCount < options.getMaxCount()) {
+                    int otherCount = options.getCount(other);
+                    if(otherCount < 0) {
+                        if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
+                            MobMerge.LOG.warning("Invalid entity type for option. Expected \'" + options.getEntityType() + "\'. Found \'" + other.getType() + "\'");
+                            continue; // this should never happen.
+                        }
+                    }
+                    if(otherCount > 0 && originalCount + removedCount + otherCount < options.getMaxCount()) {
                         removedCount += otherCount;
-                        toRemove.add(other);
+                        other.getPassengers().forEach(Entity::remove);
+                        other.remove(); // remove passengers from
                     }
                 }
             } // end nearby entities
             if(removedCount > 0) {
                 int newCount = originalCount + removedCount;
-                ((LivingEntity)entity).setCustomName(options.getChatColor() + String.valueOf(newCount));
-                ((LivingEntity)entity).setCustomNameVisible(true);
-                toRemove.forEach(e -> e.addScoreboardTag(MERGED_ENTITY_DEATH_TAG));
-                toRemove.forEach(Entity::remove);
-                toRemove.clear();
+                LivingEntity le = (LivingEntity)entity;
+                le.setCustomName(options.getChatColor() + String.valueOf(newCount));
+                le.setCustomNameVisible(true); //TODO: remove this?
+                if(!le.getScoreboardTags().contains(ConfigManager.MERGED_ENTITY_TAG.getValue())) {
+                    le.addScoreboardTag(ConfigManager.MERGED_ENTITY_TAG.getValue());
+                }
             }
         }
     }

@@ -46,6 +46,7 @@ public class ConfigManager {
     private static final ConfigurationKey VERBOSE_KEY = ConfigurationKey.create("Verbose", BooleanOption.class);
     private static final ConfigurationKey UPDATE_CONFIG_KEY = ConfigurationKey.create("Update Config Interval", NumberOption.class);
     private static final ConfigurationKey DEFAULT_MOBS_KEY = ConfigurationKey.create("Default Mobs", StringListOption.class);
+    private static final ConfigurationKey MERGED_ENTITY_KEY = ConfigurationKey.create("Merged Entity Tag", StringOption.class);
 
     // Special config keys that are useful, but should not be registered to anything in particular
     public static final ConfigurationKey CONDITIONS_KEY = ConfigurationKey.create("conditions", null);
@@ -60,6 +61,7 @@ public class ConfigManager {
     public static final BooleanOption VERBOSE = registerOption(VERBOSE_KEY, BooleanOption.newOption("verbose", true));
     public static final WorldListOption EXCLUDED_WORLDS = registerOption(EXCLUDED_WORLDS_KEY, WorldListOption.newOption("excluded-worlds", Lists.newArrayList()));
     public static final StringListOption DEFAULT_MOBS = registerOption(DEFAULT_MOBS_KEY, StringListOption.newOption("mobs.default", Lists.newArrayList()));
+    public static final StringOption MERGED_ENTITY_TAG = registerOption(MERGED_ENTITY_KEY, StringOption.newOption("default.tag", "mergedEntity"));
 
     public ConfigManager(JavaPlugin plugin, File configFile) {
         this.plugin = plugin;
@@ -109,19 +111,6 @@ public class ConfigManager {
     public void loadConfig() {
         updateOptions();
         optionManager.load(getConfig());
-        if(CONFIG_UPDATE_INTERVAL.getValue().intValue() < 0) {
-            // disable update task
-            if(task != null) {
-                task.cancel();
-            }
-        } else {
-            if(task != null) {
-                task.cancel();
-                task.reset();
-            } else {
-                task = new UpdateConfigTask(this);
-            }
-        }
     }
 
     public void saveConfig() {
