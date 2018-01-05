@@ -61,6 +61,10 @@ public final class EntityOptionManager {
         return true;
     }
 
+    public void save(FileConfiguration config) {
+        matcherOptions.values().forEach(opt -> opt.save(config));
+    }
+
     /**
      * Get the matching {@link EntityMatcherOptions} for this given entity type.
      * @param type the entity type to search for
@@ -72,10 +76,6 @@ public final class EntityOptionManager {
 
     public Map<EntityType, EntityMatcherOptions> getOptions() {
         return ImmutableMap.copyOf(matcherOptions);
-    }
-
-    public void save(FileConfiguration config) {
-        matcherOptions.values().forEach(opt -> opt.save(config));
     }
 
     public ConfigManager getConfigManager() {

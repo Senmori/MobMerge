@@ -3,6 +3,7 @@ package net.senmori.mobmerge.condition.entity;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.Priority;
+import net.senmori.mobmerge.configuration.ConfigManager;
 import org.bukkit.DyeColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -33,7 +34,10 @@ public class MatchDyeColorCondition implements Condition {
         try {
             this.color = DyeColor.valueOf(requiredValue.toUpperCase());
         } catch(IllegalArgumentException e) {
-            MobMerge.debug("Failed to find DyeColor with string " + requiredValue);
+            this.color = null; // just in case
+            if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
+                MobMerge.LOG.warning("Failed to find DyeColor with value \'" + requiredValue + "\'");
+            }
             e.printStackTrace();
         }
         return this;
