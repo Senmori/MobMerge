@@ -1,8 +1,9 @@
 # Default options for merging mobs.
-# Radius: how many blocks in each direction to search for entities to merge
-# Interval: How often, in seconds, to search for entities
-# Count: The maximum number of entities to merge. -1 for infinite.
-# Color: The ChatColor to merged mobs names to for easier distinction.
+#   Radius: how many blocks in each direction to search for entities to merge
+#   Interval: How often, in seconds, to search for entities. Values less than 1 will be reverted to 1.
+#   Count: The maximum number of entities to merge. -1 for infinite.
+#   Color: The ChatColor to merged mobs names to for easier distinction.
+#   Tag: The scoreboard tag to tag merged entities with.
 default:
   radius: 5
   interval: 3
@@ -11,26 +12,19 @@ default:
   tag: mergedEntity
 # Which mobs to merge. This acts as a whitelist.
 # Use Minecraft names for these, not the names Bukkit's EntityType assigns them.
-# Use 'all' or '*' to indicate all mobs should be merged
+# Default: Which mobs should be automatically merged.
+# See %LINK TO BE INSERTED LATER% for more information on this section.
 mobs:
   default:
     - zombie
     - skeleton
     - creeper
   zombie:
-    radius:
-      ==: Vector
-      x: 5.0
-      y: 5.0
-      z: 5.0
+    radius: [5, 3, 5]
 # Which worlds to not merge mobs in.
 # You can also use the UUID of a world.
 excluded-worlds:
   - world_nether
-# Config update options
-# Update-Interval: How often, in seconds, the config should be automatically updated. -1 to disable.
-config:
-  update-interval: -1
-  use-json: false
-verbose: true
-
+# If this plugin should be verbose about all errors. Not just major ones.
+# This could potentially spam your console. Please use caution when enabling this!
+verbose: false

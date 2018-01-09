@@ -9,6 +9,7 @@ import com.google.gson.JsonSyntaxException;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.ConditionManager;
+import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.gson.JsonUtils;
 import net.senmori.mobmerge.gson.util.JsonTypeAdapter;
 import org.bukkit.NamespacedKey;
@@ -16,6 +17,7 @@ import org.bukkit.NamespacedKey;
 import java.lang.reflect.Type;
 
 public class ConditionTypeAdapter extends JsonTypeAdapter<Condition> {
+    private static final ConditionManager conditionManager = new ConditionManager();
     @Override
     public JsonElement serialize(Condition condition, Type type, JsonSerializationContext context) {
         JsonObject json = new JsonObject();
@@ -29,7 +31,7 @@ public class ConditionTypeAdapter extends JsonTypeAdapter<Condition> {
         String name = JsonUtils.getString(jsonElement, "name");
         String value = JsonUtils.getString(jsonElement, "value");
         NamespacedKey key = MobMerge.parseStringToKey(name);
-        Class<? extends Condition> conditionClass = ConditionManager.getConditionClass(key);
+        Class<? extends Condition> conditionClass = conditionManager.getConditionClass(key);
         if(conditionClass != null) {
             try {
                 Condition condition = conditionClass.newInstance();

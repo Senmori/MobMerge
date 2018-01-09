@@ -17,6 +17,11 @@ public abstract class ListOption<V> extends ConfigOption<List> {
         return list;
     }
 
+    @Override
+    public boolean parse(String str) {
+        return false; // NOOP
+    }
+
     public void setList(List<V> newList) {
         if(newList == null || newList.isEmpty()) {
             this.list = Lists.newArrayList();

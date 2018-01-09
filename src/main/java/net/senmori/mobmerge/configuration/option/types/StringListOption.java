@@ -1,8 +1,6 @@
 package net.senmori.mobmerge.configuration.option.types;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
@@ -15,7 +13,7 @@ public class StringListOption extends ListOption<String> {
         return new StringListOption(key, defaultValue);
     }
 
-    protected StringListOption(String key, List<String> defaultValue) {
+    public StringListOption(String key, List<String> defaultValue) {
         super(key, defaultValue);
     }
 

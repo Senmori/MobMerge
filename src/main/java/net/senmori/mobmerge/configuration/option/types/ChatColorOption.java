@@ -12,7 +12,7 @@ public class ChatColorOption extends ConfigOption<ChatColor> {
         return new ChatColorOption(key, defaultValue);
     }
 
-    protected ChatColorOption(String key, ChatColor defaultValue) {
+    public ChatColorOption(String key, ChatColor defaultValue) {
         super(key, defaultValue, ChatColor.class);
     }
 
@@ -31,6 +31,17 @@ public class ChatColorOption extends ConfigOption<ChatColor> {
         } catch(IllegalArgumentException e) {
             return false;
         }
+    }
+
+    @Override
+    public boolean parse(String string) {
+        try {
+            ChatColor color = ChatColor.valueOf(string.toUpperCase());
+            setValue(color);
+        } catch(IllegalArgumentException e) {
+            return false;
+        }
+        return true;
     }
 
     @Override

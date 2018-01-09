@@ -19,7 +19,6 @@ public class MobMerge extends JavaPlugin {
     public static MobLogger LOG;
     public static MobMerge INSTANCE;
 
-    private FileConfiguration config;
     private ConfigManager configManager;
     private ProcessWorldsTask processWorldsTask;
 
@@ -29,8 +28,8 @@ public class MobMerge extends JavaPlugin {
         LOG = new MobLogger(this);
         debug("Debug mode enabled! Was this on purpose? If not, then you really messed up. Ask for help in #spigot in irc.spi.gt");
 
-
         getConfig().options().copyDefaults(true);
+        getConfig().options().copyHeader(true);
         this.saveDefaultConfig();
 
         configManager = new ConfigManager(this, new File(getDataFolder(), "config.yml"));

@@ -4,7 +4,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sun.istack.internal.NotNull;
 import net.senmori.mobmerge.annotation.Excluded;
 import net.senmori.mobmerge.condition.defaults.EntityAgeCondition;
 import net.senmori.mobmerge.condition.defaults.EntityColorCondition;
@@ -27,7 +26,7 @@ public final class ConditionManager {
     private static final BiMap<NamespacedKey, Condition> DEFAULT_CONDITIONS = HashBiMap.create();
     private static final Map<NamespacedKey, Class<? extends Condition>> CLASS_MAP = Maps.newHashMap();
 
-    public static void initDefaults() {
+    public ConditionManager() {
         registerDefaultCondition(new ValidEntityCondition());
         registerDefaultCondition(new EntityTypeCondition());
         registerDefaultCondition(new EntityColorCondition());
@@ -39,28 +38,30 @@ public final class ConditionManager {
      * <br>
      * Default conditions cannot be registered via this method. Those must be registered via {@link #registerDefaultCondition(Condition)}
      * @param condition the condition to register
-     * @return the registered condition
+     * @return the registered condition or null if the condition or condition class was already registered
      */
-    public static <T extends Condition> T registerCondition(@NotNull T condition) {
+    @Nullable
+    public <T extends Condition> T registerCondition(T condition) {
         Validate.notNull(condition, "Cannot register a null condition");
         Validate.isTrue(!isDefaultCondition(condition), "Cannot register a default condition as non-default");
-        CONDITIONS.put(condition.getKey(), condition);
-        CLASS_MAP.put(condition.getKey(), condition.getClass());
-        return condition;
+        Condition cond = CONDITIONS.putIfAbsent(condition.getKey(), condition);
+        Class clazz = CLASS_MAP.putIfAbsent(condition.getKey(), condition.getClass());
+        return (cond == null && clazz == null ? condition : null);
     }
 
     /**
      * Register a new default condition.<br>
      * A default condition is a condition which is excluded from serialization via the {@link Excluded} annotation.
      * @param condition the new default condition to register
-     * @return the registered condition
+     * @return the registered condition or null if the condition or condition class was already registered
      */
-    public static <T extends Condition> T registerDefaultCondition(@NotNull T condition) {
+    @Nullable
+    public <T extends Condition> T registerDefaultCondition(T condition) {
         Validate.notNull(condition, "Cannot register a null condition");
         Validate.isTrue(isDefaultCondition(condition), "Cannot register a non-default condition as default");
-        DEFAULT_CONDITIONS.put(condition.getKey(), condition);
-        CLASS_MAP.put(condition.getKey(), condition.getClass());
-        return condition;
+        Condition cond = DEFAULT_CONDITIONS.putIfAbsent(condition.getKey(), condition);
+        Class clazz = CLASS_MAP.putIfAbsent(condition.getKey(), condition.getClass());
+        return (cond == null && clazz == null ? condition : null);
     }
 
     /**
@@ -69,7 +70,7 @@ public final class ConditionManager {
      * @return the appropriate condition or null
      */
     @Nullable
-    public static Condition getCondition(@NotNull NamespacedKey key) {
+    public Condition getCondition(NamespacedKey key) {
         if(DEFAULT_CONDITIONS.get(key) != null) {
             return DEFAULT_CONDITIONS.get(key);
         }
@@ -82,7 +83,7 @@ public final class ConditionManager {
      * @return the appropriate condition class, or null
      */
     @Nullable
-    public static Class<? extends Condition> getConditionClass(@NotNull NamespacedKey key) {
+    public Class<? extends Condition> getConditionClass(NamespacedKey key) {
         return CLASS_MAP.get(key);
     }
 
@@ -92,7 +93,7 @@ public final class ConditionManager {
      * @param condition the condition to check
      * @return true if the Condition is a default condition
      */
-    public static boolean isDefaultCondition(@NotNull Condition condition) {
+    public boolean isDefaultCondition(Condition condition) {
         return condition.getClass().isAnnotationPresent(Excluded.class);
     }
 
@@ -102,7 +103,7 @@ public final class ConditionManager {
      * @return the appropriate {@link NamespacedKey} or null
      */
     @Nullable
-    public static NamespacedKey getKey(@NotNull Condition condition) {
+    public NamespacedKey getKey(Condition condition) {
         NamespacedKey key = null;
         if((key = DEFAULT_CONDITIONS.inverse().get(condition)) != null) {
             return key;
@@ -115,7 +116,7 @@ public final class ConditionManager {
      * @param key the key to remove
      * @return true if the condition was successfully removed
      */
-    public static boolean removeCondition(@NotNull NamespacedKey key) {
+    public boolean removeCondition(NamespacedKey key) {
         return CONDITIONS.remove(key) != null;
     }
 
@@ -124,7 +125,7 @@ public final class ConditionManager {
      * @param conditions the list of conditions to sort
      * @return a sorted list of conditions
      */
-    public static <T extends Condition> List<T> sortConditionsByPriority(@NotNull List<T> conditions) {
+    public <T extends Condition> List<T> sortConditionsByPriority(List<T> conditions) {
         return conditions.stream().sorted(new Comparator<T>() {
             @Override
             public int compare(T first, T second) {
@@ -137,7 +138,7 @@ public final class ConditionManager {
      * Gets a copy of the default conditions, sorted by their {@link Priority}
      * @return a sorted copy of the default conditions
      */
-    public static List<Condition> getDefaultConditions() {
+    public List<Condition> getDefaultConditions() {
         return sortConditionsByPriority(Lists.newArrayList(DEFAULT_CONDITIONS.values())); // sort them
     }
 
@@ -145,7 +146,7 @@ public final class ConditionManager {
      * Gets a copy of all registered, non-default conditions, sorted by their {@link Priority}
      * @return a sorted copy of all registered, non-default conditions.
      */
-    public static List<Condition> getConditions() {
+    public List<Condition> getConditions() {
         return sortConditionsByPriority(Lists.newArrayList(CONDITIONS.values()));
     }
 }

@@ -1,5 +1,6 @@
 package net.senmori.mobmerge.configuration.option.types;
 
+import io.netty.util.internal.StringUtil;
 import net.senmori.mobmerge.configuration.option.ConfigOption;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -9,7 +10,7 @@ public class StringOption extends ConfigOption<String> {
         return new StringOption(key, defaultValue);
     }
 
-    protected StringOption(String key, String defaultValue) {
+    public StringOption(String key, String defaultValue) {
         super(key, defaultValue, String.class);
     }
 
@@ -23,6 +24,11 @@ public class StringOption extends ConfigOption<String> {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean parse(String string) {
+        return !StringUtil.isNullOrEmpty((this.currentValue = string));
     }
 
     @Override

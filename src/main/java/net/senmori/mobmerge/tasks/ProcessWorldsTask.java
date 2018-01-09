@@ -1,5 +1,6 @@
 package net.senmori.mobmerge.tasks;
 
+import com.google.common.collect.Lists;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.options.EntityMatcherOptions;
@@ -7,12 +8,16 @@ import net.senmori.mobmerge.options.EntityOptionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ProcessWorldsTask extends BukkitRunnable {
     private static final Pattern EQUALS = Pattern.compile("=");
@@ -26,7 +31,10 @@ public class ProcessWorldsTask extends BukkitRunnable {
         this.manager = manager;
         this.plugin = manager.getPlugin();
         this.optionManager = manager.getEntityOptionManager();
-        this.period = ConfigManager.TICKS_PER_SECOND * ConfigManager.INTERVAL.getValue().intValue();
+        if(ConfigManager.INTERVAL.getValue().intValue() <= 0) {
+            ConfigManager.INTERVAL.setValue(1);
+        }
+        this.period = ConfigManager.TICKS_PER_SECOND * ConfigManager.INTERVAL.getValue().longValue();
 
         this.runTaskTimer(plugin, period, period);
     }
@@ -41,8 +49,7 @@ public class ProcessWorldsTask extends BukkitRunnable {
 
     private void processWorld(World world) {
         for(LivingEntity entity : world.getLivingEntities()) {
-            if(!entity.getWorld().getChunkAt(entity.getLocation()).isLoaded()) continue; // got an entity in a lazy/unloaded chunk
-            if(!entity.getType().isAlive()) continue; // ignore non-living entities
+            if(!entity.isValid()) continue;
             if(!optionManager.getOptions().containsKey(entity.getType())) {
                 continue; // not merging this entity; ignore it
             }
@@ -50,8 +57,14 @@ public class ProcessWorldsTask extends BukkitRunnable {
             Vector radius = options.getRadius();
             int originalCount = options.getCount(entity);
             int removedCount = 0;
-            for(Entity other : entity.getNearbyEntities(radius.getX(), radius.getY(), radius.getZ())) {
-                if(other.getType() != entity.getType()) continue;
+            List<Entity> nearby = entity.getNearbyEntities(radius.getX(), radius.getY(), radius.getZ()).stream()
+                    .filter(other -> !HumanEntity.class.isInstance(other)) // not a player, or human entity
+                    .filter(LivingEntity.class::isInstance) // but it is a living entity
+                    .filter(Entity::isValid)
+                    .filter(other -> !other.getUniqueId().equals(entity.getUniqueId()))
+                    .filter(other -> other.getType() == entity.getType())
+                    .collect(Collectors.toList());
+            for(Entity other : nearby) {
                 if(options.test(entity, other)) {
                     // merge mobs
                     int otherCount = options.getCount(other);
@@ -61,20 +74,19 @@ public class ProcessWorldsTask extends BukkitRunnable {
                             continue; // this should never happen.
                         }
                     }
-                    if(otherCount > 0 && originalCount + removedCount + otherCount < options.getMaxCount()) {
+                    if(originalCount + removedCount + otherCount < options.getMaxCount()) {
+                        other.remove();
                         removedCount += otherCount;
-                        other.getPassengers().forEach(Entity::remove);
-                        other.remove(); // remove passengers from
                     }
                 }
             } // end nearby entities
             if(removedCount > 0) {
                 int newCount = originalCount + removedCount;
-                LivingEntity le = (LivingEntity)entity;
-                le.setCustomName(options.getChatColor() + String.valueOf(newCount));
-                le.setCustomNameVisible(true); //TODO: remove this?
-                if(!le.getScoreboardTags().contains(ConfigManager.MERGED_ENTITY_TAG.getValue())) {
-                    le.addScoreboardTag(ConfigManager.MERGED_ENTITY_TAG.getValue());
+                LivingEntity living = (LivingEntity)entity;
+                living.setCustomName(options.getChatColor() + String.valueOf(newCount));
+                living.setCustomNameVisible(true); //TODO: remove this?
+                if(!living.getScoreboardTags().contains(ConfigManager.MERGED_ENTITY_TAG.getValue())) {
+                    living.addScoreboardTag(ConfigManager.MERGED_ENTITY_TAG.getValue());
                 }
             }
         }

@@ -9,7 +9,7 @@ public class BooleanOption extends ConfigOption<Boolean> {
         return new BooleanOption(key, defaultValue);
     }
 
-    protected BooleanOption(String key, Boolean defaultValue) {
+    public BooleanOption(String key, Boolean defaultValue) {
         super(key, defaultValue, Boolean.class);
     }
 
@@ -22,6 +22,12 @@ public class BooleanOption extends ConfigOption<Boolean> {
             return false;
         }
         setValue(Boolean.parseBoolean(str));
+        return true;
+    }
+
+    @Override
+    public boolean parse(String string) {
+        setValue(Boolean.parseBoolean(string));
         return true;
     }
 

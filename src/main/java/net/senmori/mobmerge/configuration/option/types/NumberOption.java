@@ -1,11 +1,8 @@
 package net.senmori.mobmerge.configuration.option.types;
 
 import net.senmori.mobmerge.configuration.option.ConfigOption;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.configuration.file.FileConfiguration;
-
-import java.text.NumberFormat;
-import java.text.ParseException;
 
 public class NumberOption extends ConfigOption<Number> {
 
@@ -13,7 +10,7 @@ public class NumberOption extends ConfigOption<Number> {
         return new NumberOption(key, defaultValue);
     }
 
-    protected NumberOption(String key, Number defaultValue) {
+    public NumberOption(String key, Number defaultValue) {
         super(key, defaultValue, Number.class);
     }
 
@@ -21,13 +18,17 @@ public class NumberOption extends ConfigOption<Number> {
     public boolean load(FileConfiguration config) {
         if(!config.contains(getPath())) return false;
 
-        String str = config.getString(getPath());
-        if(str != null && !str.isEmpty() && NumberUtils.isNumber(str)) {
+        return parse(config.getString(getPath()));
+    }
+
+    @Override
+    public boolean parse(String strValue) {
+        if(strValue != null && !strValue.isEmpty() && NumberUtils.isParsable(strValue)) {
             // it's a number
             try {
-                setValue(NumberFormat.getInstance().parse(str));
+                setValue(NumberUtils.createNumber(strValue));
                 return true;
-            } catch (ParseException e) {
+            } catch (NumberFormatException e) {
                 return false;
             }
         }
