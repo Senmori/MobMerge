@@ -40,4 +40,6 @@ public abstract class BooleanCondition implements Condition {
     public abstract Priority getPriority();
 
     public abstract NamespacedKey getKey();
+
+    public abstract Condition clone();
 }

@@ -16,7 +16,7 @@ import org.bukkit.entity.Entity;
  * As well, if two colorable entities(sheep) are being compared, with a required value of {@link org.bukkit.DyeColor#CYAN},
  *      then both sheep must have the required color for the condition to return true.
  */
-public interface Condition extends Keyed {
+public interface Condition extends Keyed, Cloneable {
 
     /**
      * Set the required value of this Condition.
@@ -24,9 +24,7 @@ public interface Condition extends Keyed {
      * @return the modified Condition to chain calls.
      * @throws IllegalArgumentException if the argument could not be parsed correctly.
      */
-    default Condition setRequiredValue(String requiredValue) {
-        return this;
-    }
+    Condition setRequiredValue(String requiredValue);
 
     /**
      * This compares two objects of the same type.
@@ -59,26 +57,9 @@ public interface Condition extends Keyed {
      */
     public abstract Priority getPriority();
 
-
-    abstract class Serializer<T extends Condition> {
-        private NamespacedKey name;
-        private Class<T> conditionClass;
-
-        protected Serializer(NamespacedKey name, Class<T> clazz) {
-            this.name = name;
-            this.conditionClass = clazz;
-        }
-
-        public NamespacedKey getName() {
-            return this.name;
-        }
-
-        public Class<T> getConditionClass() {
-            return this.conditionClass;
-        }
-
-        public abstract void serialize(JsonObject json, T type, JsonSerializationContext context);
-
-        public abstract T deserialize(JsonObject json, JsonDeserializationContext context);
-    }
+    /**
+     * Clone this condition, and return a new instance of it.
+     * @return a new instance of this condition
+     */
+    public Condition clone();
 }

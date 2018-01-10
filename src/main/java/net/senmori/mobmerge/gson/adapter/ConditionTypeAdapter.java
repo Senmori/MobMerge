@@ -17,7 +17,7 @@ import org.bukkit.NamespacedKey;
 import java.lang.reflect.Type;
 
 public class ConditionTypeAdapter extends JsonTypeAdapter<Condition> {
-    private static final ConditionManager conditionManager = new ConditionManager();
+    private static final ConditionManager conditionManager = ConditionManager.getInstance();
     @Override
     public JsonElement serialize(Condition condition, Type type, JsonSerializationContext context) {
         JsonObject json = new JsonObject();

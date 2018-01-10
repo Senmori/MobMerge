@@ -22,15 +22,22 @@ import java.util.stream.Collectors;
  * This class handles the registration of {@link Condition}s.
  */
 public final class ConditionManager {
-    private static final BiMap<NamespacedKey, Condition> CONDITIONS = HashBiMap.create();
-    private static final BiMap<NamespacedKey, Condition> DEFAULT_CONDITIONS = HashBiMap.create();
-    private static final Map<NamespacedKey, Class<? extends Condition>> CLASS_MAP = Maps.newHashMap();
+    private static ConditionManager INSTANCE = new ConditionManager();
 
-    public ConditionManager() {
+    private final BiMap<NamespacedKey, Condition> CONDITIONS = HashBiMap.create();
+    private final BiMap<NamespacedKey, Condition> DEFAULT_CONDITIONS = HashBiMap.create();
+    private final Map<NamespacedKey, Class<? extends Condition>> CLASS_MAP = Maps.newHashMap();
+
+    private ConditionManager() {
         registerDefaultCondition(new ValidEntityCondition());
         registerDefaultCondition(new EntityTypeCondition());
         registerDefaultCondition(new EntityColorCondition());
         registerDefaultCondition(new EntityAgeCondition());
+    }
+
+
+    public static ConditionManager getInstance() {
+        return INSTANCE;
     }
 
     /**
@@ -74,7 +81,7 @@ public final class ConditionManager {
         if(DEFAULT_CONDITIONS.get(key) != null) {
             return DEFAULT_CONDITIONS.get(key);
         }
-        return CONDITIONS.get(key);
+        return CONDITIONS.get(key).clone();
     }
 
     /**
@@ -126,12 +133,7 @@ public final class ConditionManager {
      * @return a sorted list of conditions
      */
     public <T extends Condition> List<T> sortConditionsByPriority(List<T> conditions) {
-        return conditions.stream().sorted(new Comparator<T>() {
-            @Override
-            public int compare(T first, T second) {
-                return Integer.compare(first.getPriority().getPriorityID(), second.getPriority().getPriorityID());
-            }
-        }).collect(Collectors.toList());
+        return conditions.stream().sorted(new ConditionComparator()).collect(Collectors.toList());
     }
 
     /**

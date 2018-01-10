@@ -69,6 +69,11 @@ public class MatchDyeColorCondition implements Condition {
     }
 
     @Override
+    public MatchDyeColorCondition clone() {
+        return this.color == null ? new MatchDyeColorCondition() : new MatchDyeColorCondition(this.getRequiredValue());
+    }
+
+    @Override
     public NamespacedKey getKey() {
         return MobMerge.newKey("dyeColor");
     }

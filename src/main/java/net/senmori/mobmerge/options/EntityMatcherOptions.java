@@ -9,7 +9,6 @@ import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.Priority;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.configuration.option.ConfigOption;
-import net.senmori.mobmerge.configuration.option.ConfigurationKey;
 import net.senmori.mobmerge.configuration.option.types.ChatColorOption;
 import net.senmori.mobmerge.configuration.option.types.NumberOption;
 import net.senmori.mobmerge.configuration.option.types.VectorOption;
@@ -27,17 +26,13 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("deprecation")
 public class EntityMatcherOptions {
     private final EntityType entityType;
     private final String typeName;
-    private final Map<ConfigurationKey, ConfigOption> options = Maps.newHashMap();
+    private final Map<String, ConfigOption> options = Maps.newHashMap();
     private final ConfigManager configManager;
     private final EntityOptionManager optionManager;
-
-    // options keys
-    private final ConfigurationKey RADIUS_KEY = ConfigurationKey.create("Mob Radius", VectorOption.class);
-    private final ConfigurationKey COUNT_KEY = ConfigurationKey.create("Mob Max Count", NumberOption.class);
-    private final ConfigurationKey CHAT_COLOR_KEY = ConfigurationKey.create("Mob Chat Color", ChatColorOption.class);
 
     // options
     private final VectorOption RADIUS = VectorOption.newOption("radius", ConfigManager.RADIUS.getValue());
@@ -49,9 +44,9 @@ public class EntityMatcherOptions {
     public EntityMatcherOptions(ConfigManager configManager, EntityType entityType) {
         this.entityType = entityType;
         this.typeName = entityType.getName().toLowerCase();
-        addOption(RADIUS_KEY, RADIUS);
-        addOption(COUNT_KEY, COUNT);
-        addOption(CHAT_COLOR_KEY, CHAT_COLOR);
+        addOption(typeName + " Radius", RADIUS);
+        addOption(typeName + " Max Count", COUNT);
+        addOption(typeName + " Chat Color", CHAT_COLOR);
         this.configManager = configManager;
         this.optionManager = configManager.getEntityOptionManager();
         conditions.addAll(configManager.getConditionManager().getDefaultConditions());
@@ -123,18 +118,18 @@ public class EntityMatcherOptions {
         return 1;
     }
 
-    public <T extends ConfigOption> boolean addOption(ConfigurationKey key, T option) {
+    public <T extends ConfigOption> boolean addOption(String key, T option) {
         return options.putIfAbsent(key, option) == null;
     }
 
     public boolean load(FileConfiguration config) {
-        ConfigurationSection mobSection = config.getConfigurationSection(ConfigManager.MOBS_KEY.getName());
+        ConfigurationSection mobSection = config.getConfigurationSection(ConfigManager.MOBS_KEY);
         if(mobSection == null) {
-            MobMerge.LOG.warning("Expected configuration section at " + ConfigManager.MOBS_KEY.getName() + ". Found " + config.get(ConfigManager.MOBS_KEY.getName()).getClass().getName());
+            MobMerge.LOG.warning("Expected configuration section at " + ConfigManager.MOBS_KEY + ". Found " + config.get(ConfigManager.MOBS_KEY).getClass().getName());
             return false;
         }
         ConfigurationSection typeSection = mobSection.getConfigurationSection(this.typeName);
-        String path = ConfigManager.MOBS_KEY.getName() + "." + this.typeName;
+        String path = ConfigManager.MOBS_KEY + "." + this.typeName;
         if(typeSection == null) {
             MobMerge.LOG.warning("Expected section at " + path + ". Found null");
             return false;
@@ -200,7 +195,7 @@ public class EntityMatcherOptions {
                     RADIUS.setValue(vector);
                 }
             }
-            if(typeSection.isConfigurationSection(node) && node.equals(ConfigManager.CONDITIONS_KEY.getName())) {
+            if(typeSection.isConfigurationSection(node) && node.equals(ConfigManager.CONDITIONS_KEY)) {
                 // condition node
                 ConfigurationSection condNode = typeSection.getConfigurationSection(node);
                 for(String key : condNode.getKeys(false)) {
@@ -223,7 +218,7 @@ public class EntityMatcherOptions {
     }
 
     public void save(FileConfiguration config) {
-        String path = ConfigManager.MOBS_KEY.getName() + "." + this.typeName;
+        String path = ConfigManager.MOBS_KEY + "." + this.typeName;
 
         ConfigurationSection section = config.getConfigurationSection(path);
 
@@ -232,9 +227,9 @@ public class EntityMatcherOptions {
         }
 
         if(!conditions.isEmpty()) {
-            ConfigurationSection condSection = section.getConfigurationSection(ConfigManager.CONDITIONS_KEY.getName());
+            ConfigurationSection condSection = section.getConfigurationSection(ConfigManager.CONDITIONS_KEY);
             if(condSection == null) {
-                condSection = section.createSection(ConfigManager.CONDITIONS_KEY.getName());
+                condSection = section.createSection(ConfigManager.CONDITIONS_KEY);
                 MobMerge.debug("Created empty conditions section for " + section.getCurrentPath());
             }
             for(Condition con : this.conditions) {
@@ -276,7 +271,7 @@ public class EntityMatcherOptions {
      * Get an immutable copy of all {@link ConfigOption}s for this entity type.
      * @return an immutable copy of config options.
      */
-    public Map<ConfigurationKey, ConfigOption> getOptions() {
+    public Map<String, ConfigOption> getOptions() {
         return ImmutableMap.copyOf(this.options);
     }
 

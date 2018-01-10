@@ -1,6 +1,7 @@
 package net.senmori.mobmerge.condition.entity;
 
 import net.senmori.mobmerge.MobMerge;
+import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.Priority;
 import net.senmori.mobmerge.condition.type.BooleanCondition;
 import org.bukkit.NamespacedKey;
@@ -14,6 +15,11 @@ import org.bukkit.entity.Entity;
  * To ignore this condition, remove it from the {@link net.senmori.mobmerge.options.EntityMatcherOptions}
  */
 public class ChargedCreeperCondition extends BooleanCondition {
+
+    public ChargedCreeperCondition(boolean charged) {
+        super(charged);
+    }
+
     @Override
     public boolean test(Entity entity, Entity other) {
         if(entity instanceof Creeper && other instanceof Creeper) {
@@ -30,5 +36,10 @@ public class ChargedCreeperCondition extends BooleanCondition {
     @Override
     public NamespacedKey getKey() {
         return MobMerge.newKey("charged");
+    }
+
+    @Override
+    public Condition clone() {
+        return new ChargedCreeperCondition(this.getRequiredValue());
     }
 }

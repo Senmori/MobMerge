@@ -36,6 +36,10 @@ public class ConfigManager {
     private final FileConfiguration config;
     private final File configFile;
 
+    // Special keys that are useful
+    public static final String MOBS_KEY = "mobs";
+    public static final String CONDITIONS_KEY = "conditions";
+
     // Options
     public static final VectorOption RADIUS = registerOption("Default Radius", VectorOption.newOption("default.radius", new Vector(5, 5, 5)));
     public static final NumberOption INTERVAL = registerOption("Default Interval", NumberOption.newOption("default.interval", 5));
@@ -52,7 +56,7 @@ public class ConfigManager {
         this.configFile = configFile;
         this.optionManager = new EntityOptionManager(this);
         entityOptionManager = this.optionManager;
-        this.conditionManager = new ConditionManager();
+        this.conditionManager = ConditionManager.getInstance();
         loadConfig();
     }
 
