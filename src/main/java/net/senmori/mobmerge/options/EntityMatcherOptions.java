@@ -55,9 +55,9 @@ public class EntityMatcherOptions {
         this.optionManager = settingsManager.getEntityOptionManager();
         conditions.addAll(conditionManager.getDefaultConditions());
 
-        RADIUS = addOption(this.formattedTypeName + " Radius", VectorOption.newOption("radius", settingsManager.RADIUS.getValue()));
-        COUNT = addOption(this.formattedTypeName + " Max Count", NumberOption.newOption("count", settingsManager.MAX_COUNT.getValue()));
-        CHAT_COLOR = addOption(this.formattedTypeName + " Chat Color", ChatColorOption.newOption("color", settingsManager.DEFAULT_COLOR.getValue()));
+        RADIUS = addOption(this.formattedTypeName + " Radius", new VectorOption("radius", settingsManager.DEFAULT_SECTION.RADIUS.getValue()));
+        COUNT = addOption(this.formattedTypeName + " Max Count", new NumberOption("count", settingsManager.DEFAULT_SECTION.MAX_COUNT.getValue()));
+        CHAT_COLOR = addOption(this.formattedTypeName + " Chat Color", new ChatColorOption("color", settingsManager.DEFAULT_SECTION.COLOR.getValue()));
     }
 
     public <T extends ConfigOption> T addOption(String key, T option) {
@@ -169,7 +169,7 @@ public class EntityMatcherOptions {
                         Vector result;
                         switch(intList.size()) {
                             case 0:
-                                result = settingsManager.RADIUS.getValue();
+                                result = settingsManager.DEFAULT_SECTION.RADIUS.getValue();
                                 break;
                             case 1:
                                 int x = intList.get(0);
@@ -193,7 +193,7 @@ public class EntityMatcherOptions {
                                 if(settingsManager.VERBOSE.getValue()) {
                                     MobMerge.LOG.warning("Failed to import radius for " + typeSection.getCurrentPath() + ". Setting it to default value.");
                                 }
-                                RADIUS.setValue(settingsManager.RADIUS.getValue());
+                                RADIUS.setValue(settingsManager.DEFAULT_SECTION.RADIUS.getValue());
                             }
                         }
                     }

@@ -1,12 +1,6 @@
 package net.senmori.mobmerge;
 
 import io.netty.util.internal.StringUtil;
-import net.senmori.mobmerge.condition.ConditionManager;
-import net.senmori.mobmerge.condition.entity.ChargedCreeperCondition;
-import net.senmori.mobmerge.condition.entity.EntityCustomNameCondition;
-import net.senmori.mobmerge.condition.entity.EntityHasCustomNameCondition;
-import net.senmori.mobmerge.condition.entity.EntityScoreboardTagCondition;
-import net.senmori.mobmerge.condition.entity.MatchDyeColorCondition;
 import net.senmori.mobmerge.configuration.SettingsManager;
 import net.senmori.mobmerge.listener.EntityListener;
 import net.senmori.mobmerge.tasks.ProcessWorldsTask;
@@ -42,19 +36,14 @@ public class MobMerge extends JavaPlugin {
 
         settingsManager = new SettingsManager(this, new File(getDataFolder(), "config.yml"));
 
-        ConditionManager.getInstance().registerCondition(new ChargedCreeperCondition());
-        ConditionManager.getInstance().registerCondition(new EntityCustomNameCondition());
-        ConditionManager.getInstance().registerCondition(new EntityHasCustomNameCondition());
-        ConditionManager.getInstance().registerCondition(new EntityScoreboardTagCondition());
-        ConditionManager.getInstance().registerCondition(new MatchDyeColorCondition());
-
         processWorldsTask = new ProcessWorldsTask(settingsManager);
         new EntityListener(settingsManager);
+
     }
 
     @Override
     public void onDisable() {
-        settingsManager.saveConfig();
+        settingsManager.save();
     }
 
     public static NamespacedKey newKey(String key) {

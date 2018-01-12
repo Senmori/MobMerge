@@ -15,7 +15,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ProcessWorldsTask extends BukkitRunnable {
@@ -28,7 +27,7 @@ public class ProcessWorldsTask extends BukkitRunnable {
         this.settingsManager = settingsManager;
         this.plugin = settingsManager.getPlugin();
         this.optionManager = settingsManager.getEntityOptionManager();
-        this.period = 20 * settingsManager.INTERVAL.getValue().longValue();
+        this.period = 20 * settingsManager.DEFAULT_SECTION.INTERVAL.getValue().longValue();
 
         this.runTaskTimer(plugin, period, period);
     }
@@ -79,8 +78,8 @@ public class ProcessWorldsTask extends BukkitRunnable {
                 LivingEntity living = (LivingEntity)entity;
                 living.setCustomName(options.getChatColor() + String.valueOf(newCount) + ChatColor.RESET);
                 living.setCustomNameVisible(true); //TODO: remove this?
-                if(!living.getScoreboardTags().contains(settingsManager.MERGED_ENTITY_TAG.getValue())) {
-                    living.addScoreboardTag(settingsManager.MERGED_ENTITY_TAG.getValue());
+                if(!living.getScoreboardTags().contains(settingsManager.DEFAULT_SECTION.ENTITY_TAG.getValue())) {
+                    living.addScoreboardTag(settingsManager.DEFAULT_SECTION.ENTITY_TAG.getValue());
                 }
             }
         }

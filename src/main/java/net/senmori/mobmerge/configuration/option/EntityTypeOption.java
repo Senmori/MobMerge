@@ -1,6 +1,7 @@
 package net.senmori.mobmerge.configuration.option;
 
 import com.google.common.collect.Lists;
+import net.senmori.mobmerge.configuration.resolver.EntityTypeListResolver;
 import net.senmori.senlib.configuration.option.ListOption;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
@@ -8,14 +9,16 @@ import org.bukkit.entity.EntityType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EntityTypeOption extends ListOption<EntityType> {
-    private static final String LIVING_ENTITY_WILDCARD = "living";
+    private static final EntityTypeListResolver resolver = new EntityTypeListResolver();
 
     private boolean livingEntityWildcard = false;
     public EntityTypeOption(String key) {
         super(key, Lists.newArrayList());
         setWildcard(false);
+        setResolver(resolver);
     }
 
     public EntityTypeOption(String key, List<EntityType> defaultTypes) {
@@ -31,70 +34,55 @@ public class EntityTypeOption extends ListOption<EntityType> {
     @Override
     public void setValue(List list) {
         list.forEach(obj -> {
-            if(obj instanceof EntityType) {
-                this.list.add((EntityType)obj);
+            if (obj instanceof EntityType) {
+                this.list.add((EntityType) obj);
             }
-            if(obj instanceof String) {
-                String str = (String)obj;
+            if (obj instanceof String) {
+                String str = (String) obj;
 
-                if(str.equalsIgnoreCase(LIVING_ENTITY_WILDCARD)) {
+                if (str.equalsIgnoreCase("living")) {
                     setWildcard(true);
                     populateLivingEntities(this.list);
                 }
 
                 EntityType type = EntityType.fromName(str.toLowerCase());
-                if(type != null) {
+                if (type != null) {
                     this.list.add(type);
                 }
             }
         });
-    }
-
-    private void populateLivingEntities(List<EntityType> list) {
-        list.addAll(Arrays.stream(EntityType.values()).filter(EntityType::isAlive).collect(Collectors.toList()));
+        this.list = this.list.stream().distinct().collect(Collectors.toList()); // filter duplicates
+        checkWildcard();
     }
 
     @Override
     public boolean load(FileConfiguration config) {
-        if(!config.contains(getPath())) return false;
-        if(!config.isList(getPath())) return false;
         setWildcard(false);
+        setList(resolver.resolve(config, getPath()));
 
-        List<String> types = config.getStringList(getPath());
-
-        for(String s : types) {
-            if(s.equalsIgnoreCase(LIVING_ENTITY_WILDCARD)) {
-                populateLivingEntities(this.list);
-                setWildcard(true);
-            }
-            EntityType type = EntityType.fromName(s.toLowerCase());
-            if(type != null) {
-                this.list.add(type);
-            }
-        }
-        return true;
-    }
-
-    public List<String> getStringList() {
-        List<String> result = Lists.newArrayList();
-        List<EntityType> values = getValue();
-        if(isUsingWildcard()) {
-            values.removeAll(this.list.stream().filter(EntityType::isAlive).collect(Collectors.toList()));
-            result.add("living");
-        }
-        for(EntityType type : values) {
-            if(type.getName() != null) {
-                result.add(type.getName());
-            }
-        }
-        return result;
+        checkWildcard();
+        return this.currentValue != null;
     }
 
     @Override
     public void save(FileConfiguration config) {
+        config.set(getPath(), getStringList());
+    }
+
+    public List<String> getStringList() {
+        checkWildcard();
         List<String> result = Lists.newArrayList();
         List<EntityType> values = getValue();
-        config.set(getPath(), getStringList());
+        if(isUsingWildcard()) {
+            result.add("living");
+        }
+        for(EntityType type : values) {
+            if(isUsingWildcard() && type.isAlive()) continue;
+            if(type.isAlive()) {
+                result.add(type.getName());
+            }
+        }
+        return result.stream().distinct().collect(Collectors.toList()); // remove duplicates
     }
 
     public boolean isUsingWildcard() {
@@ -103,5 +91,17 @@ public class EntityTypeOption extends ListOption<EntityType> {
 
     public void setWildcard(boolean value) {
         this.livingEntityWildcard = value;
+    }
+
+    private void populateLivingEntities(List<EntityType> list) {
+        list.addAll(Arrays.stream(EntityType.values()).filter(EntityType::isAlive).collect(Collectors.toList()));
+    }
+
+    private void checkWildcard() {
+        List<EntityType> slave = Stream.of(EntityType.values()).filter(EntityType::isAlive).collect(Collectors.toList());
+        List<EntityType> master = this.list;
+        if(master.containsAll(slave)) {
+            setWildcard(true);
+        }
     }
 }

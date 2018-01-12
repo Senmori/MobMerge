@@ -41,14 +41,14 @@ public class EntityListener implements Listener {
                 return;
             }
         }
-        if(count < 2 || !event.getEntity().getScoreboardTags().contains(settingsManager.MERGED_ENTITY_TAG.getValue())) {
+        if(count < 2 || !event.getEntity().getScoreboardTags().contains(settingsManager.DEFAULT_SECTION.ENTITY_TAG.getValue())) {
             return; // it's not a merged entity
         }
         int newCount = count - 1;
         event.getEntity().getWorld().spawn(event.getEntity().getLocation(), event.getEntity().getType().getEntityClass(), (entity) -> {
             entity.setCustomName(options.getChatColor() + Integer.toString(newCount) + ChatColor.RESET);
             entity.setCustomNameVisible(true);
-            entity.getScoreboardTags().add(settingsManager.MERGED_ENTITY_TAG.getValue());
+            entity.getScoreboardTags().add(settingsManager.DEFAULT_SECTION.ENTITY_TAG.getValue());
         });
     }
 }

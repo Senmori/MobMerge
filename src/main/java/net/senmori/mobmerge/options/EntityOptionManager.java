@@ -85,6 +85,10 @@ public final class EntityOptionManager {
         return ImmutableMap.copyOf(matcherOptions);
     }
 
+    public Map<String, ConfigOption> getConfigOptions() {
+        return ImmutableMap.copyOf(options);
+    }
+
     public SettingsManager getSettingsManager() {
         return settingsManager;
     }

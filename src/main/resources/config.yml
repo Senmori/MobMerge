@@ -19,7 +19,7 @@ default:
 mobs:
   custom-name-visible: true # If the entity's custom name (after being merged should be visible)
   default:
-    - living
+    - hostile
   zombie:
     radius: [5, 3, 5]
 # Which worlds to not merge mobs in.
