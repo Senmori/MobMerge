@@ -35,18 +35,18 @@ public class VectorOption extends ConfigOption<Vector> {
         Object obj = config.get(getPath());
         if(obj instanceof Vector) {
             setValue((Vector)obj);
-        } else if(config.isList(getPath())){
+        } else if(obj instanceof List){
             if(config.getIntegerList(getPath()) != null) {
                 List<Integer> intList = config.getIntegerList(getPath());
                 Vector result;
                 if(intList.isEmpty()) {
                     this.currentValue = this.defaultValue; // reset value
-                    return true;
+                    return false;
                 }
                 switch (intList.size()) {
                     case 0:
-                        result = this.defaultValue;
-                        break;
+                        this.currentValue = this.defaultValue;
+                        return false; // no integers in the list provided.
                     case 1:
                         int value = intList.get(0);
                         result = new Vector(value, value, value);

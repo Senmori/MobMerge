@@ -6,6 +6,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -53,24 +54,38 @@ public abstract class SectionOption extends StringOption {
 
             getOptions().values().forEach(configOption -> {
                 if(configOption.getPath().equals(node)) {
-                   if(!configOption.parse(section.getString(node))) {
-                       error.set(true);
-                   }
+                    if(!configOption.parse(section.getString(node))) {
+                        error.set(true);
+                    }
                 }
             });
         }
-        return !error.get();
+
+        return !error.get() && load(section);
     }
+
+    public abstract boolean load(ConfigurationSection section);
+
+    public abstract boolean save(ConfigurationSection section);
 
     @Override
     public void save(FileConfiguration config) {
-        getOptions().values().forEach(option -> config.set(getPath() + "." + option.getPath(), option.getValue()));
+        for(String node : section.getKeys(false)) {
+
+            if(canLoadOption(node)) {
+                getOptions().values().forEach(opt -> {
+                    section.set(node + config.options().pathSeparator() + opt.getPath(), opt.getValue());
+                });
+            } else {
+                save(getSection());
+            }
+        }
     }
 
-    private boolean canLoadOption(String node) {
-        return  section.isList(node) ||
-                section.isSet(node) ||
-                section.isConfigurationSection(node) ||
-                section.get(node) instanceof ConfigurationSerializable;
+    protected boolean canLoadOption(String node) {
+        return  !section.isList(node) ||
+                !section.isSet(node) ||
+                !section.isConfigurationSection(node) ||
+                !(section.get(node) instanceof ConfigurationSerializable);
     }
 }

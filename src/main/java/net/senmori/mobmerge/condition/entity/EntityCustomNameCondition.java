@@ -12,6 +12,10 @@ import org.bukkit.entity.Entity;
  */
 public class EntityCustomNameCondition extends StringCondition {
 
+    public EntityCustomNameCondition() {
+        super("");
+    }
+
     public EntityCustomNameCondition(String name) {
         super(name);
     }

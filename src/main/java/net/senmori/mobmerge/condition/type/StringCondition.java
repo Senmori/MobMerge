@@ -1,5 +1,6 @@
 package net.senmori.mobmerge.condition.type;
 
+import io.netty.util.internal.StringUtil;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.Priority;
 import org.bukkit.NamespacedKey;
@@ -22,7 +23,7 @@ public abstract class StringCondition implements Condition {
 
     @Override
     public Condition setRequiredValue(String requiredValue) {
-        this.value = requiredValue;
+        this.value = StringUtil.isNullOrEmpty(requiredValue) ? "" : requiredValue;
         return null;
     }
 

@@ -9,6 +9,10 @@ import net.senmori.mobmerge.condition.defaults.EntityAgeCondition;
 import net.senmori.mobmerge.condition.defaults.EntityColorCondition;
 import net.senmori.mobmerge.condition.defaults.EntityTypeCondition;
 import net.senmori.mobmerge.condition.defaults.ValidEntityCondition;
+import net.senmori.mobmerge.condition.entity.ChargedCreeperCondition;
+import net.senmori.mobmerge.condition.entity.EntityCustomNameCondition;
+import net.senmori.mobmerge.condition.entity.EntityHasCustomNameCondition;
+import net.senmori.mobmerge.condition.entity.MatchDyeColorCondition;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.NamespacedKey;
 
@@ -16,6 +20,7 @@ import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +38,11 @@ public final class ConditionManager {
         registerDefaultCondition(new EntityTypeCondition());
         registerDefaultCondition(new EntityColorCondition());
         registerDefaultCondition(new EntityAgeCondition());
+
+        registerCondition(new ChargedCreeperCondition());
+        registerCondition(new EntityCustomNameCondition());
+        registerCondition(new EntityHasCustomNameCondition());
+        registerCondition(new MatchDyeColorCondition());
     }
 
 
@@ -78,10 +88,10 @@ public final class ConditionManager {
      */
     @Nullable
     public Condition getCondition(NamespacedKey key) {
-        if(DEFAULT_CONDITIONS.get(key) != null) {
+        if(DEFAULT_CONDITIONS.containsKey(key)) {
             return DEFAULT_CONDITIONS.get(key);
         }
-        return CONDITIONS.get(key).clone();
+        return CONDITIONS.containsKey(key) ? CONDITIONS.get(key).clone() : null;
     }
 
     /**

@@ -14,6 +14,10 @@ import org.bukkit.entity.Entity;
  */
 public class EntityHasCustomNameCondition extends BooleanCondition {
 
+    public EntityHasCustomNameCondition() {
+        super(true);
+    }
+
     public EntityHasCustomNameCondition(boolean hasCustomName) {
         super(hasCustomName);
     }

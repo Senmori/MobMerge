@@ -30,8 +30,8 @@ public abstract class ColorableCondition implements Condition {
     }
 
     @Override
-    public ChatColor getRequiredValue() {
-        return null;
+    public DyeColor getRequiredValue() {
+        return color;
     }
 
     @Override

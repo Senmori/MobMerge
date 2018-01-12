@@ -6,6 +6,7 @@ import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.options.EntityMatcherOptions;
 import net.senmori.mobmerge.options.EntityOptionManager;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -83,7 +84,7 @@ public class ProcessWorldsTask extends BukkitRunnable {
             if(removedCount > 0) {
                 int newCount = originalCount + removedCount;
                 LivingEntity living = (LivingEntity)entity;
-                living.setCustomName(options.getChatColor() + String.valueOf(newCount));
+                living.setCustomName(options.getChatColor() + String.valueOf(newCount) + ChatColor.RESET);
                 living.setCustomNameVisible(true); //TODO: remove this?
                 if(!living.getScoreboardTags().contains(ConfigManager.MERGED_ENTITY_TAG.getValue())) {
                     living.addScoreboardTag(ConfigManager.MERGED_ENTITY_TAG.getValue());

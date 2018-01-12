@@ -37,7 +37,6 @@ public class ConfigManager {
     private final File configFile;
 
     // Special keys that are useful
-    public static final String MOBS_KEY = "mobs";
     public static final String CONDITIONS_KEY = "conditions";
 
     // Options
@@ -47,7 +46,6 @@ public class ConfigManager {
     public static final ChatColorOption DEFAULT_COLOR = registerOption("Default Chat Color", ChatColorOption.newOption("default.color", ChatColor.RED));
     public static final BooleanOption VERBOSE = registerOption("Verbose", BooleanOption.newOption("verbose", true));
     public static final WorldListOption EXCLUDED_WORLDS = registerOption("Excluded Worlds", WorldListOption.newOption("excluded-worlds", Lists.newArrayList()));
-    public static final StringListOption DEFAULT_MOBS = registerOption("Default Mobs", StringListOption.newOption("mobs.default", Lists.newArrayList()));
     public static final StringOption MERGED_ENTITY_TAG = registerOption("Default Entity Tag", StringOption.newOption("default.tag", "mergedEntity"));
 
     public ConfigManager(JavaPlugin plugin, File configFile) {

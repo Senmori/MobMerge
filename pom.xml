@@ -25,6 +25,9 @@
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>
@@ -38,6 +41,12 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>net.senmori.senlib</pattern>
+                  <shadedPattern>net.senmori.senlib</shadedPattern>
+                </relocation>
+              </relocations>
               <minimizeJar>true</minimizeJar>
             </configuration>
           </execution>
@@ -69,6 +78,11 @@
       <artifactId>spigot</artifactId>
       <version>1.12.2-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.senmori</groupId>
+      <artifactId>senlib</artifactId>
+      <version>LATEST</version>
     </dependency>
   </dependencies>
 </project>

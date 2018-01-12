@@ -16,6 +16,10 @@ import org.bukkit.entity.Entity;
  */
 public class ChargedCreeperCondition extends BooleanCondition {
 
+    public ChargedCreeperCondition() {
+        super(false);
+    }
+
     public ChargedCreeperCondition(boolean charged) {
         super(charged);
     }
@@ -23,6 +27,7 @@ public class ChargedCreeperCondition extends BooleanCondition {
     @Override
     public boolean test(Entity entity, Entity other) {
         if(entity instanceof Creeper && other instanceof Creeper) {
+            MobMerge.debug("Charged Creeper Condition: " + ((Creeper)entity).isPowered() + " against " + ((Creeper)other).isPowered() + " -- required: " + this.getRequiredValue());
             return ((Creeper)entity).isPowered() == getRequiredValue() && ((Creeper)other).isPowered() == getRequiredValue();
         }
         return false;

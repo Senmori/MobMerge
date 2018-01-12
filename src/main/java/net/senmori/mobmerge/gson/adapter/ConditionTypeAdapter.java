@@ -15,6 +15,8 @@ import net.senmori.mobmerge.gson.util.JsonTypeAdapter;
 import org.bukkit.NamespacedKey;
 
 import java.lang.reflect.Type;
+import java.util.Objects;
+import java.util.Optional;
 
 public class ConditionTypeAdapter extends JsonTypeAdapter<Condition> {
     private static final ConditionManager conditionManager = ConditionManager.getInstance();
@@ -31,18 +33,10 @@ public class ConditionTypeAdapter extends JsonTypeAdapter<Condition> {
         String name = JsonUtils.getString(jsonElement, "name");
         String value = JsonUtils.getString(jsonElement, "value");
         NamespacedKey key = MobMerge.parseStringToKey(name);
-        Class<? extends Condition> conditionClass = conditionManager.getConditionClass(key);
-        if(conditionClass != null) {
-            try {
-                Condition condition = conditionClass.newInstance();
-                condition.setRequiredValue(value);
-                return condition;
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        } else {
-            throw new JsonSyntaxException("Unknown condition \'" + name + "\'");
+        Condition condition = conditionManager.getCondition(key);
+        if(condition != null) {
+            return condition.setRequiredValue(value);
         }
-        return null;
+        throw new JsonSyntaxException("Unknown condition \'" + name + "\'");
     }
 }

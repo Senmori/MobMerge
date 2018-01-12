@@ -7,13 +7,16 @@ import com.google.common.collect.Maps;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.Priority;
+import net.senmori.mobmerge.condition.type.ColorableCondition;
 import net.senmori.mobmerge.configuration.ConfigManager;
 import net.senmori.mobmerge.configuration.option.ConfigOption;
 import net.senmori.mobmerge.configuration.option.types.ChatColorOption;
 import net.senmori.mobmerge.configuration.option.types.NumberOption;
 import net.senmori.mobmerge.configuration.option.types.VectorOption;
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -24,6 +27,7 @@ import org.bukkit.util.Vector;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @SuppressWarnings("deprecation")
@@ -43,10 +47,10 @@ public class EntityMatcherOptions {
 
     public EntityMatcherOptions(ConfigManager configManager, EntityType entityType) {
         this.entityType = entityType;
-        this.typeName = entityType.getName().toLowerCase();
-        addOption(typeName + " Radius", RADIUS);
-        addOption(typeName + " Max Count", COUNT);
-        addOption(typeName + " Chat Color", CHAT_COLOR);
+        this.typeName = entityType.getName().toLowerCase().replaceAll("_", " ");
+        addOption(WordUtils.capitalizeFully(typeName) + " Radius", RADIUS);
+        addOption(WordUtils.capitalizeFully(typeName) + " Max Count", COUNT);
+        addOption(WordUtils.capitalizeFully(typeName) + " Chat Color", CHAT_COLOR);
         this.configManager = configManager;
         this.optionManager = configManager.getEntityOptionManager();
         conditions.addAll(configManager.getConditionManager().getDefaultConditions());
@@ -76,7 +80,6 @@ public class EntityMatcherOptions {
      * @return true if the new max count is different than the old max count
      */
     public boolean setMaxCount(int maxCount) {
-        if(maxCount < 0) return false;
         if(maxCount == getMaxCount()) return false;
         int old = getMaxCount();
         COUNT.setValue(maxCount);
@@ -123,13 +126,14 @@ public class EntityMatcherOptions {
     }
 
     public boolean load(FileConfiguration config) {
-        ConfigurationSection mobSection = config.getConfigurationSection(ConfigManager.MOBS_KEY);
+        String MOBS_KEY = optionManager.MOBS_SECTION.getPath();
+        ConfigurationSection mobSection = config.getConfigurationSection(MOBS_KEY);
         if(mobSection == null) {
-            MobMerge.LOG.warning("Expected configuration section at " + ConfigManager.MOBS_KEY + ". Found " + config.get(ConfigManager.MOBS_KEY).getClass().getName());
+            MobMerge.LOG.warning("Expected configuration section at " + MOBS_KEY + ". Found " + config.get(MOBS_KEY).getClass().getName());
             return false;
         }
         ConfigurationSection typeSection = mobSection.getConfigurationSection(this.typeName);
-        String path = ConfigManager.MOBS_KEY + "." + this.typeName;
+        String path = MOBS_KEY + "." + this.typeName;
         if(typeSection == null) {
             MobMerge.LOG.warning("Expected section at " + path + ". Found null");
             return false;
@@ -201,7 +205,7 @@ public class EntityMatcherOptions {
                 for(String key : condNode.getKeys(false)) {
                     Condition condition = null;
                     // try to parse key for a valid namespace
-                    NamespacedKey nameKey = MobMerge.newKey(key.replaceAll("\"", "")); // remove double quotes
+                    NamespacedKey nameKey = MobMerge.parseStringToKey(key.replaceAll("\"", "")); // remove double quotes
                     condition = configManager.getConditionManager().getCondition(nameKey);
                     if(condition == null) {
                         if(ConfigManager.VERBOSE.getValue()) {
@@ -214,15 +218,20 @@ public class EntityMatcherOptions {
                 }
             }
         }
+        MobMerge.debug("Loaded options for " + WordUtils.capitalizeFully(this.typeName.replaceAll("_", " ")));
         return true;
     }
 
     public void save(FileConfiguration config) {
-        String path = ConfigManager.MOBS_KEY + "." + this.typeName;
+        String path = optionManager.MOBS_SECTION.getPath() + "." + this.typeName;
 
         ConfigurationSection section = config.getConfigurationSection(path);
 
         for(ConfigOption opt : options.values()) {
+            if(opt instanceof ChatColorOption) {
+                section.set(opt.getPath(), ( (ChatColorOption) opt ).getValue().name().toLowerCase(Locale.ENGLISH));
+                continue;
+            }
             section.set(opt.getPath(), opt.getValue());
         }
 
@@ -242,7 +251,11 @@ public class EntityMatcherOptions {
                     continue;
                 }
                 // we have to surround namespaced keys with double quotes because yaml is awesome like that!
-                condSection.set("\"" + conditionKey.toString() + "\"", con.getStringValue());
+                if(con instanceof ColorableCondition && con.getRequiredValue() != null) {
+                    condSection.set("\"" + conditionKey.toString() + "\"", con.getStringValue());
+                } else {
+                    condSection.set("\"" + conditionKey.toString() + "\"", con.getRequiredValue());
+                }
             }
         }
     }

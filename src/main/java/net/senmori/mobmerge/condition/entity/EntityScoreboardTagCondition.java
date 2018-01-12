@@ -12,6 +12,10 @@ import org.bukkit.entity.Entity;
  */
 public class EntityScoreboardTagCondition extends StringCondition {
 
+    public EntityScoreboardTagCondition() {
+        super("");
+    }
+
     public EntityScoreboardTagCondition(String requiredTag) {
         super(requiredTag);
     }

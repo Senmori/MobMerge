@@ -4,6 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.configuration.ConfigManager;
+import net.senmori.mobmerge.configuration.option.ConfigOption;
+import net.senmori.mobmerge.configuration.option.MobsSection;
+import net.senmori.mobmerge.configuration.option.types.SectionOption;
+import net.senmori.mobmerge.configuration.option.types.StringListOption;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
@@ -14,31 +18,37 @@ import java.util.Map;
 public final class EntityOptionManager {
     private final Map<EntityType, EntityMatcherOptions> matcherOptions = Maps.newHashMap();
     private final ConfigManager configManager;
+    private final Map<String, ConfigOption> options = Maps.newHashMap();
+
+    public final MobsSection MOBS_SECTION = addOption("Mobs Section", new MobsSection("mobs"));
 
     public EntityOptionManager(ConfigManager configManager) {
         this.configManager = configManager;
     }
 
+    public <T extends ConfigOption> T addOption(String key, T option) {
+        options.put(key, option);
+        return option;
+    }
+
     public boolean load(FileConfiguration config) {
-        String path = ConfigManager.MOBS_KEY;
+        if(!options.values().stream().allMatch(options -> options.load(config))) {
+            if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
+                MobMerge.LOG.warning("Failed to load mob section for EntityOptionManager");
+                return false; // mobs section isn't present; or it's not a section
+            }
+        }
+        String path = MOBS_SECTION.getPath();
         ConfigurationSection section = config.getConfigurationSection(path);
         if(section == null) {
             MobMerge.LOG.info("Expected section at key \'" + path + "\'. Found null");
             return false;
         }
-        List<String> defaultTypes = ConfigManager.DEFAULT_MOBS.getValue();
-        for(String types : defaultTypes) {
-            EntityType entityType = EntityType.fromName(types);
-            if(entityType == null || !entityType.isAlive()) {
-                if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
-                    MobMerge.LOG.warning("Invalid entity type registered. Expected a valid living entity. Found " + types);
-                }
-                continue;
-            }
-            matcherOptions.put(entityType, getOptionsFor(entityType));
+        for(EntityType type : MOBS_SECTION.DEFAULT_MOBS.getValue()) {
+            matcherOptions.put(type, getOptionsFor(type));
         }
         for(String node : section.getKeys(false)) {
-            if((section.getCurrentPath() + "." + node).equals(ConfigManager.DEFAULT_MOBS.getPath())) continue; // mobs.default == mobs.default
+            if((section.getCurrentPath() + "." + node).equals(MOBS_SECTION.getPath())) continue; // mobs.default == mobs.default
             EntityType entityType = EntityType.fromName(node);
             if(entityType == null || !entityType.isAlive()) {
                 if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
@@ -47,6 +57,7 @@ public final class EntityOptionManager {
                 continue; // it's not a valid entity; ignore it.
             }
             if(section.isConfigurationSection(node)) {
+                MobMerge.debug("Loading options for " + node);
                 EntityMatcherOptions options = getOptionsFor(entityType);
                 if(!options.load(config)) {
                     if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {

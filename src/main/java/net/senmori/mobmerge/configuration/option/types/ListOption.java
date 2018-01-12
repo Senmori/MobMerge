@@ -6,7 +6,7 @@ import net.senmori.mobmerge.configuration.option.ConfigOption;
 import java.util.List;
 
 public abstract class ListOption<V> extends ConfigOption<List> {
-    private List<V> list;
+    protected List<V> list;
     protected ListOption(String key, List<V> defaultValue) {
         super(key, defaultValue, List.class);
         this.list = defaultValue;
