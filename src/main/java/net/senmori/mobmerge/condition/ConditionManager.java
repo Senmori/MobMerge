@@ -8,6 +8,8 @@ import net.senmori.mobmerge.annotation.Excluded;
 import net.senmori.mobmerge.condition.defaults.EntityAgeCondition;
 import net.senmori.mobmerge.condition.defaults.EntityColorCondition;
 import net.senmori.mobmerge.condition.defaults.EntityTypeCondition;
+import net.senmori.mobmerge.condition.defaults.LeashedEntityCondition;
+import net.senmori.mobmerge.condition.defaults.TamedEntityCondition;
 import net.senmori.mobmerge.condition.defaults.ValidEntityCondition;
 import net.senmori.mobmerge.condition.entity.ChargedCreeperCondition;
 import net.senmori.mobmerge.condition.entity.EntityCustomNameCondition;
@@ -17,10 +19,8 @@ import org.apache.commons.lang3.Validate;
 import org.bukkit.NamespacedKey;
 
 import javax.annotation.Nullable;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -33,11 +33,21 @@ public final class ConditionManager {
     private final BiMap<NamespacedKey, Condition> DEFAULT_CONDITIONS = HashBiMap.create();
     private final Map<NamespacedKey, Class<? extends Condition>> CLASS_MAP = Maps.newHashMap();
 
+    // Default conditions
+    public final ValidEntityCondition VALID_ENTITY_CONDITION;
+    public final EntityTypeCondition ENTITY_TYPE_CONDITION;
+    public final EntityColorCondition ENTITY_COLOR_CONDITION;
+    public final EntityAgeCondition ENTITY_AGE_CONDITION;
+    public final LeashedEntityCondition LEASHED_ENTITY_CONDITION;
+    public final TamedEntityCondition TAMED_ENTITY_CONDITION;
+
     private ConditionManager() {
-        registerDefaultCondition(new ValidEntityCondition());
-        registerDefaultCondition(new EntityTypeCondition());
-        registerDefaultCondition(new EntityColorCondition());
-        registerDefaultCondition(new EntityAgeCondition());
+        VALID_ENTITY_CONDITION = registerDefaultCondition(new ValidEntityCondition());
+        ENTITY_TYPE_CONDITION = registerDefaultCondition(new EntityTypeCondition());
+        ENTITY_COLOR_CONDITION = registerDefaultCondition(new EntityColorCondition());
+        ENTITY_AGE_CONDITION = registerDefaultCondition(new EntityAgeCondition());
+        LEASHED_ENTITY_CONDITION = registerDefaultCondition(new LeashedEntityCondition());
+        TAMED_ENTITY_CONDITION = registerDefaultCondition(new TamedEntityCondition());
 
         registerCondition(new ChargedCreeperCondition());
         registerCondition(new EntityCustomNameCondition());

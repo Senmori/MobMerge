@@ -7,13 +7,12 @@ import net.senmori.mobmerge.condition.entity.EntityCustomNameCondition;
 import net.senmori.mobmerge.condition.entity.EntityHasCustomNameCondition;
 import net.senmori.mobmerge.condition.entity.EntityScoreboardTagCondition;
 import net.senmori.mobmerge.condition.entity.MatchDyeColorCondition;
-import net.senmori.mobmerge.configuration.ConfigManager;
+import net.senmori.mobmerge.configuration.SettingsManager;
 import net.senmori.mobmerge.listener.EntityListener;
 import net.senmori.mobmerge.tasks.ProcessWorldsTask;
 import net.senmori.mobmerge.util.MobLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,9 +21,13 @@ import java.io.File;
 public class MobMerge extends JavaPlugin {
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("mobMergeDebug", "false"));
     public static MobLogger LOG;
-    public static MobMerge INSTANCE;
+    private static MobMerge INSTANCE;
 
-    private ConfigManager configManager;
+    public static MobMerge getInstance() {
+        return INSTANCE;
+    }
+
+    private SettingsManager settingsManager;
     private ProcessWorldsTask processWorldsTask;
 
     @Override
@@ -37,7 +40,7 @@ public class MobMerge extends JavaPlugin {
         getConfig().options().copyHeader(true);
         this.saveDefaultConfig();
 
-        configManager = new ConfigManager(this, new File(getDataFolder(), "config.yml"));
+        settingsManager = new SettingsManager(this, new File(getDataFolder(), "config.yml"));
 
         ConditionManager.getInstance().registerCondition(new ChargedCreeperCondition());
         ConditionManager.getInstance().registerCondition(new EntityCustomNameCondition());
@@ -45,13 +48,13 @@ public class MobMerge extends JavaPlugin {
         ConditionManager.getInstance().registerCondition(new EntityScoreboardTagCondition());
         ConditionManager.getInstance().registerCondition(new MatchDyeColorCondition());
 
-        processWorldsTask = new ProcessWorldsTask(configManager);
-        new EntityListener(configManager);
+        processWorldsTask = new ProcessWorldsTask(settingsManager);
+        new EntityListener(settingsManager);
     }
 
     @Override
     public void onDisable() {
-        configManager.saveConfig();
+        settingsManager.saveConfig();
     }
 
     public static NamespacedKey newKey(String key) {
@@ -83,5 +86,9 @@ public class MobMerge extends JavaPlugin {
 
     public static boolean isDebugMode() {
         return DEBUG;
+    }
+
+    public SettingsManager getSettingsManager() {
+        return settingsManager;
     }
 }

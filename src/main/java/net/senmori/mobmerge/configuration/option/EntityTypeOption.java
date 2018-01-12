@@ -1,7 +1,7 @@
 package net.senmori.mobmerge.configuration.option;
 
 import com.google.common.collect.Lists;
-import net.senmori.mobmerge.configuration.option.types.ListOption;
+import net.senmori.senlib.configuration.option.ListOption;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 

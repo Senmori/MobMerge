@@ -3,27 +3,24 @@ package net.senmori.mobmerge.options;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.senmori.mobmerge.MobMerge;
-import net.senmori.mobmerge.configuration.ConfigManager;
-import net.senmori.mobmerge.configuration.option.ConfigOption;
+import net.senmori.mobmerge.configuration.SettingsManager;
 import net.senmori.mobmerge.configuration.option.MobsSection;
-import net.senmori.mobmerge.configuration.option.types.SectionOption;
-import net.senmori.mobmerge.configuration.option.types.StringListOption;
+import net.senmori.senlib.configuration.ConfigOption;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 
-import java.util.List;
 import java.util.Map;
 
 public final class EntityOptionManager {
     private final Map<EntityType, EntityMatcherOptions> matcherOptions = Maps.newHashMap();
-    private final ConfigManager configManager;
+    private final SettingsManager settingsManager;
     private final Map<String, ConfigOption> options = Maps.newHashMap();
 
     public final MobsSection MOBS_SECTION = addOption("Mobs Section", new MobsSection("mobs"));
 
-    public EntityOptionManager(ConfigManager configManager) {
-        this.configManager = configManager;
+    public EntityOptionManager(SettingsManager settingsManager) {
+        this.settingsManager = settingsManager;
     }
 
     public <T extends ConfigOption> T addOption(String key, T option) {
@@ -33,7 +30,7 @@ public final class EntityOptionManager {
 
     public boolean load(FileConfiguration config) {
         if(!options.values().stream().allMatch(options -> options.load(config))) {
-            if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
+            if(settingsManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
                 MobMerge.LOG.warning("Failed to load mob section for EntityOptionManager");
                 return false; // mobs section isn't present; or it's not a section
             }
@@ -51,7 +48,7 @@ public final class EntityOptionManager {
             if((section.getCurrentPath() + "." + node).equals(MOBS_SECTION.getPath())) continue; // mobs.default == mobs.default
             EntityType entityType = EntityType.fromName(node);
             if(entityType == null || !entityType.isAlive()) {
-                if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
+                if(settingsManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
                     MobMerge.LOG.warning("Invalid entity type registered: " + node);
                 }
                 continue; // it's not a valid entity; ignore it.
@@ -60,7 +57,7 @@ public final class EntityOptionManager {
                 MobMerge.debug("Loading options for " + node);
                 EntityMatcherOptions options = getOptionsFor(entityType);
                 if(!options.load(config)) {
-                    if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
+                    if(settingsManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
                         MobMerge.LOG.warning("Failed to load entity matcher options for entity type: " + entityType);
                     }
                 } else {
@@ -81,14 +78,14 @@ public final class EntityOptionManager {
      * @return the matching {@link EntityMatcherOptions}, or a new instance if none exists.
      */
     public EntityMatcherOptions getOptionsFor(EntityType type) {
-        return this.matcherOptions.getOrDefault(type, new EntityMatcherOptions(this.getConfigManager(), type));
+        return this.matcherOptions.getOrDefault(type, new EntityMatcherOptions(this.getSettingsManager(), type));
     }
 
     public Map<EntityType, EntityMatcherOptions> getOptions() {
         return ImmutableMap.copyOf(matcherOptions);
     }
 
-    public ConfigManager getConfigManager() {
-        return configManager;
+    public SettingsManager getSettingsManager() {
+        return settingsManager;
     }
 }

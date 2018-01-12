@@ -9,14 +9,11 @@ import com.google.gson.JsonSyntaxException;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.ConditionManager;
-import net.senmori.mobmerge.configuration.ConfigManager;
-import net.senmori.mobmerge.gson.JsonUtils;
-import net.senmori.mobmerge.gson.util.JsonTypeAdapter;
+import net.senmori.senlib.gson.JsonTypeAdapter;
+import net.senmori.senlib.gson.JsonUtils;
 import org.bukkit.NamespacedKey;
 
 import java.lang.reflect.Type;
-import java.util.Objects;
-import java.util.Optional;
 
 public class ConditionTypeAdapter extends JsonTypeAdapter<Condition> {
     private static final ConditionManager conditionManager = ConditionManager.getInstance();

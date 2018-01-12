@@ -1,8 +1,8 @@
 package net.senmori.mobmerge.configuration.option;
 
 import com.google.common.collect.Lists;
-import net.senmori.mobmerge.configuration.option.types.BooleanOption;
-import net.senmori.mobmerge.configuration.option.types.SectionOption;
+import net.senmori.senlib.configuration.option.BooleanOption;
+import net.senmori.senlib.configuration.option.SectionOption;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 

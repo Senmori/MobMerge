@@ -1,8 +1,10 @@
 package net.senmori.mobmerge.condition.type;
 
 import io.netty.util.internal.StringUtil;
+import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.Priority;
+import net.senmori.mobmerge.configuration.SettingsManager;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 
@@ -11,6 +13,7 @@ import org.bukkit.entity.Entity;
  * This could be a custom name, or scoreboard tags, or anything else than can be serialized as a string.
  */
 public abstract class StringCondition implements Condition {
+    protected static final SettingsManager settingsManager = MobMerge.getInstance().getSettingsManager();
     private String value = "";
 
     public StringCondition() {

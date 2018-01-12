@@ -1,9 +1,9 @@
 package net.senmori.mobmerge.condition.entity;
 
 import net.senmori.mobmerge.MobMerge;
-import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.Priority;
 import net.senmori.mobmerge.condition.type.StringCondition;
+import net.senmori.senlib.util.StringUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 
@@ -22,7 +22,7 @@ public class EntityCustomNameCondition extends StringCondition {
 
     @Override
     public boolean test(Entity entity, Entity other) {
-        return entity.getCustomName() != null && entity.getCustomName().equals(getRequiredValue()) && other.getCustomName() != null && other.getCustomName().equals(getRequiredValue());
+        return StringUtils.equals(entity.getCustomName(), other.getCustomName());
     }
 
     @Override

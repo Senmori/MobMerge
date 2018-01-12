@@ -7,6 +7,8 @@ import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 
+import java.util.function.BiPredicate;
+
 /**
  * Represents a condition which is applied to two entities of the same type.<br>
  * <br>
@@ -16,7 +18,7 @@ import org.bukkit.entity.Entity;
  * As well, if two colorable entities(sheep) are being compared, with a required value of {@link org.bukkit.DyeColor#CYAN},
  *      then both sheep must have the required color for the condition to return true.
  */
-public interface Condition extends Keyed, Cloneable {
+public interface Condition extends Keyed, Cloneable, BiPredicate<Entity, Entity> {
 
     /**
      * Set the required value of this Condition.

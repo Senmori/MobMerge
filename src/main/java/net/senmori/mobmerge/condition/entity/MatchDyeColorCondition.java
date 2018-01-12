@@ -3,7 +3,8 @@ package net.senmori.mobmerge.condition.entity;
 import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.Priority;
-import net.senmori.mobmerge.configuration.ConfigManager;
+import net.senmori.mobmerge.condition.type.ColorableCondition;
+import net.senmori.mobmerge.configuration.SettingsManager;
 import org.bukkit.DyeColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -11,7 +12,7 @@ import org.bukkit.material.Colorable;
 
 import java.util.Locale;
 
-public class MatchDyeColorCondition implements Condition {
+public class MatchDyeColorCondition extends ColorableCondition {
     private DyeColor color = null;
 
     public MatchDyeColorCondition() {}
@@ -27,15 +28,11 @@ public class MatchDyeColorCondition implements Condition {
 
     @Override
     public MatchDyeColorCondition setRequiredValue(String requiredValue) {
-        if(Boolean.parseBoolean(requiredValue)) {
-            color = null;
-            return this; // value is 'true', so we don't match a specific color
-        }
         try {
             this.color = DyeColor.valueOf(requiredValue.toUpperCase());
         } catch(IllegalArgumentException e) {
             this.color = null; // just in case
-            if(ConfigManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
+            if(settingsManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
                 MobMerge.LOG.warning("Failed to find DyeColor with value \'" + requiredValue + "\'");
             }
             e.printStackTrace();
@@ -51,11 +48,6 @@ public class MatchDyeColorCondition implements Condition {
             return color == null ? fColorable.getColor() == fOther.getColor() : (fColorable.getColor() == color && fOther.getColor() == color);
         }
         return false;
-    }
-
-    @Override
-    public DyeColor getRequiredValue() {
-        return color;
     }
 
     @Override
