@@ -1,10 +1,9 @@
 package net.senmori.mobmerge.condition.defaults;
 
 import net.senmori.mobmerge.MobMerge;
-import net.senmori.mobmerge.annotation.Excluded;
-import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.Priority;
 import net.senmori.mobmerge.condition.type.BooleanCondition;
+import net.senmori.senlib.annotation.Excluded;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 

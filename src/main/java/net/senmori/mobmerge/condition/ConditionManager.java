@@ -4,7 +4,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.senmori.mobmerge.annotation.Excluded;
 import net.senmori.mobmerge.condition.defaults.EntityAgeCondition;
 import net.senmori.mobmerge.condition.defaults.EntityColorCondition;
 import net.senmori.mobmerge.condition.defaults.EntityTypeCondition;
@@ -15,6 +14,7 @@ import net.senmori.mobmerge.condition.entity.ChargedCreeperCondition;
 import net.senmori.mobmerge.condition.entity.EntityCustomNameCondition;
 import net.senmori.mobmerge.condition.entity.EntityHasCustomNameCondition;
 import net.senmori.mobmerge.condition.entity.MatchDyeColorCondition;
+import net.senmori.senlib.annotation.Excluded;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.NamespacedKey;
 
