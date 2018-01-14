@@ -8,14 +8,13 @@ import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.ConditionManager;
 import net.senmori.mobmerge.condition.Priority;
-import net.senmori.mobmerge.condition.type.ColorableCondition;
 import net.senmori.mobmerge.configuration.SettingsManager;
+import net.senmori.mobmerge.configuration.option.ConditionSection;
 import net.senmori.senlib.configuration.ConfigOption;
 import net.senmori.senlib.configuration.option.ChatColorOption;
 import net.senmori.senlib.configuration.option.NumberOption;
 import net.senmori.senlib.configuration.option.VectorOption;
 import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -24,8 +23,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
 
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,8 +34,12 @@ public class EntityMatcherOptions {
     private final String formattedTypeName;
     private final Map<String, ConfigOption> options = Maps.newHashMap();
     private final SettingsManager settingsManager;
+
+
     private final EntityOptionManager optionManager;
     private final ConditionManager conditionManager = ConditionManager.getInstance();
+
+    private final ConditionSection conditionSection;
 
     // options
     private final VectorOption RADIUS;
@@ -50,9 +51,10 @@ public class EntityMatcherOptions {
     public EntityMatcherOptions(SettingsManager settingsManager, EntityType entityType) {
         this.entityType = entityType;
         this.typeName = entityType.getName().toLowerCase();
-        this.formattedTypeName = WordUtils.capitalizeFully(this.typeName.replaceAll("_", " "));
+        this.formattedTypeName = WordUtils.capitalizeFully(this.typeName.replaceAll("_", " ").toLowerCase());
         this.settingsManager = settingsManager;
         this.optionManager = settingsManager.getEntityOptionManager();
+        this.conditionSection = settingsManager.CONDITIONS_SECTION;
         conditions.addAll(conditionManager.getDefaultConditions());
 
         RADIUS = addOption(this.formattedTypeName + " Radius", new VectorOption("radius", settingsManager.DEFAULT_SECTION.RADIUS.getValue()));
@@ -151,80 +153,18 @@ public class EntityMatcherOptions {
         // we are already at "mobs.<type>"
         // e.g. mobs.zombie.<node> <-- currently at 'node'
         for(String node : typeSection.getKeys(false)) {
-            if(!typeSection.isConfigurationSection(node)) {
+            if (! typeSection.isConfigurationSection(node)) {
                 // it's not a 'conditions' node
                 // check for radius, count, color
-               if(node.equals(COUNT.getPath())) {
-                   COUNT.setValue(typeSection.getInt(COUNT.getPath()));
-               }
-               if(node.equals(CHAT_COLOR.getPath())) {
-                   CHAT_COLOR.setValue(ChatColor.valueOf(typeSection.getString(CHAT_COLOR.getPath()).toUpperCase()));
-               }
-            }
-            if(node.equals(RADIUS.getPath())) {
-                if( !(typeSection.get(RADIUS.getPath()) instanceof Vector) ) {
-                    // treat it as a single integer
-                    if(typeSection.getIntegerList(RADIUS.getPath()) != null) {
-                        List<Integer> intList = typeSection.getIntegerList(RADIUS.getPath());
-                        Vector result;
-                        switch(intList.size()) {
-                            case 0:
-                                result = settingsManager.DEFAULT_SECTION.RADIUS.getValue();
-                                break;
-                            case 1:
-                                int x = intList.get(0);
-                                result = new Vector(x,x,x);
-                                break;
-                            case 2:
-                                result = new Vector(intList.get(0), intList.get(1), intList.get(0)); // use 'x' for x & z
-                                break;
-                            case 3:
-                            default:
-                                result = new Vector(intList.get(0), intList.get(1), intList.get(2));
-                        }
-                        RADIUS.setValue(result);
-                    } else {
-                        String numberStr = typeSection.getString(RADIUS.getPath());
-                        if(NumberUtils.isNumber(numberStr)) {
-                            try {
-                                Number num = NumberFormat.getInstance().parse(numberStr);
-                                RADIUS.setValue(new Vector(num.doubleValue(), num.doubleValue(), num.doubleValue()));
-                            } catch (ParseException e) {
-                                if(settingsManager.VERBOSE.getValue()) {
-                                    MobMerge.LOG.warning("Failed to import radius for " + typeSection.getCurrentPath() + ". Setting it to default value.");
-                                }
-                                RADIUS.setValue(settingsManager.DEFAULT_SECTION.RADIUS.getValue());
-                            }
-                        }
-                    }
-                } else {
-                    // it's a vector
-                    Vector vector = typeSection.getVector(RADIUS.getPath());
-                    if(vector == null) {
-                        MobMerge.LOG.warning("Expected vector at mobs." + this.typeName + "." + node + ". Found: " + typeSection.get(node).getClass().getName());
-                        MobMerge.LOG.warning("Setting default radius for entity type " + this.entityType + " to " + RADIUS.getValue().toString());
-                        continue;
-                    }
-                    RADIUS.setValue(vector);
+                if (node.equals(COUNT.getPath())) {
+                    COUNT.setValue(typeSection.getInt(COUNT.getPath()));
+                }
+                if (node.equals(CHAT_COLOR.getPath())) {
+                    CHAT_COLOR.setValue(CHAT_COLOR.getResolver().resolve(typeSection, CHAT_COLOR.getPath()));
                 }
             }
-            if(typeSection.isConfigurationSection(node) && node.equals(SettingsManager.CONDITIONS_KEY)) {
-                // condition node
-                ConfigurationSection condNode = typeSection.getConfigurationSection(node);
-                for(String key : condNode.getKeys(false)) {
-                    Condition condition = null;
-                    // try to parse key for a valid namespace
-                    NamespacedKey nameKey = MobMerge.parseStringToKey(key.replaceAll("\"", "")); // remove double quotes
-                    condition = conditionManager.getCondition(nameKey);
-                    if(condition == null) {
-                        if(settingsManager.VERBOSE.getValue()) {
-                            MobMerge.LOG.info("Failed to find condition \'" + key + "\' in section " + condNode.getCurrentPath());
-                        }
-                        continue;
-                    }
-                    MobMerge.debug("Found condition \'" + condition.getKey().toString() + "\' with value \'" + condition.getRequiredValue().toString() + "\' for entity " + this.typeName);
-                    this.conditions.add(condition.setRequiredValue(condNode.getString(key)));
-                }
+            if (node.equals(RADIUS.getPath())) {
+                RADIUS.setValue(RADIUS.getResolver().resolve(typeSection, RADIUS.getPath()));
             }
         }
         MobMerge.debug("Loaded options for " + WordUtils.capitalizeFully(this.typeName.replaceAll("_", " ")));
@@ -245,9 +185,9 @@ public class EntityMatcherOptions {
         }
 
         if(!conditions.isEmpty()) {
-            ConfigurationSection condSection = section.getConfigurationSection(SettingsManager.CONDITIONS_KEY);
+            ConfigurationSection condSection = section.getConfigurationSection(conditionSection.getPath());
             if(condSection == null) {
-                condSection = section.createSection(SettingsManager.CONDITIONS_KEY);
+                condSection = section.createSection(conditionSection.getPath());
                 MobMerge.debug("Created empty conditions section for " + section.getCurrentPath());
             }
             for(Condition con : this.conditions) {
@@ -257,13 +197,6 @@ public class EntityMatcherOptions {
                     if(settingsManager.VERBOSE.getValue()) {
                         MobMerge.LOG.warning("Unknown condition \'" + con.getClass().getName() + "\'. Could not find matching NamespacedKey.");
                     }
-                    continue;
-                }
-                // we have to surround namespaced keys with double quotes because yaml is awesome like that!
-                if(con instanceof ColorableCondition && con.getRequiredValue() != null) {
-                    condSection.set("\"" + conditionKey.toString() + "\"", con.getStringValue());
-                } else {
-                    condSection.set("\"" + conditionKey.toString() + "\"", con.getRequiredValue());
                 }
             }
         }
@@ -279,9 +212,6 @@ public class EntityMatcherOptions {
         if(entity.getType() != this.getEntityType() || other.getType() != this.getEntityType()) return false; // wrong entities
         for(Condition cond : getConditions()) {
             if(!cond.test(entity, other)) {
-                if(settingsManager.VERBOSE.getValue()) {
-                    MobMerge.LOG.warning("Condition \'" + cond.getClass().getName() + "\' failed. Required value (" + cond.getStringValue() + ")");
-                }
                 return false;
             }
         }
@@ -315,7 +245,7 @@ public class EntityMatcherOptions {
     public boolean removeCondition(NamespacedKey key) {
         return this.conditions
                        .stream()
-                       .filter(condition -> ! conditionManager.isDefaultCondition(condition))
+                       .filter(condition -> !conditionManager.isDefaultCondition(condition))
                        .filter(condition -> condition.getKey().equals(key))
                        .findFirst()
                        .map(condition -> this.conditions.remove(condition))

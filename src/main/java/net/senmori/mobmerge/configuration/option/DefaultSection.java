@@ -19,7 +19,7 @@ public class DefaultSection extends SectionOption {
     public final StringOption ENTITY_TAG = addOption("Entity Tag", new StringOption("tag", "mergedEntity"));
 
     public DefaultSection(String key) {
-        super(key, key);
+        super(key);
     }
 
     @Override

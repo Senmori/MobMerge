@@ -1,8 +1,8 @@
 package net.senmori.mobmerge.configuration;
 
 import com.google.common.collect.Lists;
-import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.condition.ConditionManager;
+import net.senmori.mobmerge.configuration.option.ConditionSection;
 import net.senmori.mobmerge.configuration.option.DefaultSection;
 import net.senmori.mobmerge.configuration.option.MobsSection;
 import net.senmori.mobmerge.options.EntityOptionManager;
@@ -19,12 +19,10 @@ public class SettingsManager extends ConfigManager {
     private final EntityOptionManager optionManager;
     private final ConditionManager conditionManager;
 
-    // Special keys that are useful
-    public static final String CONDITIONS_KEY = "conditions";
-
     // Options
     public final DefaultSection DEFAULT_SECTION = registerOption("Default Section", new DefaultSection("default"));
     public final MobsSection MOBS_SECTION = registerOption("Mobs Section", new MobsSection("mobs"));
+    public final ConditionSection CONDITIONS_SECTION = registerOption("Conditions Section", new ConditionSection("conditions"));
 
     public final BooleanOption VERBOSE = registerOption("Verbose", BooleanOption.newOption("verbose", true));
     public final WorldListOption EXCLUDED_WORLDS = registerOption("Excluded Worlds", WorldListOption.newOption("excluded-worlds", Lists.newArrayList()));
@@ -34,7 +32,6 @@ public class SettingsManager extends ConfigManager {
         super(plugin, configFile);
         this.optionManager = new EntityOptionManager(this);
         this.conditionManager = ConditionManager.getInstance();
-        load();
     }
 
     public EntityOptionManager getEntityOptionManager() {
@@ -43,14 +40,5 @@ public class SettingsManager extends ConfigManager {
 
     public ConditionManager getConditionManager() {
         return conditionManager;
-    }
-
-    @Override
-    public void load() {
-        getOptions().forEach((k,v) -> {
-            if(!v.load(getConfig())) {
-                MobMerge.debug("Failed to load config option: " + v.toString());
-            }
-        });
     }
 }

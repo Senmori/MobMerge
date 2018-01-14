@@ -1,6 +1,5 @@
 package net.senmori.mobmerge.configuration.option;
 
-import net.senmori.mobmerge.configuration.resolver.EntityTypeListResolver;
 import net.senmori.senlib.configuration.option.BooleanOption;
 import net.senmori.senlib.configuration.option.SectionOption;
 import org.bukkit.configuration.ConfigurationSection;
@@ -12,12 +11,13 @@ public class MobsSection extends SectionOption {
     public final BooleanOption CUSTOM_NAME_VISIBLE = addOption("Custom Name Visible", new BooleanOption("custom-name-visible", true));
 
     public MobsSection(String key) {
-        super(key, key);
+        super(key);
     }
 
     @Override
     public boolean load(ConfigurationSection section) {
-        DEFAULT_MOBS.setList(new EntityTypeListResolver().resolve(section, DEFAULT_MOBS.getPath()));
+        DEFAULT_MOBS.setList(DEFAULT_MOBS.getResolver().resolve(section, DEFAULT_MOBS.getPath()));
+        DEFAULT_MOBS.setFilters(DEFAULT_MOBS.getResolver().getFilters(section, DEFAULT_MOBS.getPath()));
         return true;
     }
 

@@ -3,24 +3,13 @@ package net.senmori.mobmerge.condition;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.senmori.mobmerge.condition.defaults.EntityAgeCondition;
-import net.senmori.mobmerge.condition.defaults.EntityColorCondition;
-import net.senmori.mobmerge.condition.defaults.EntityTypeCondition;
-import net.senmori.mobmerge.condition.defaults.LeashedEntityCondition;
-import net.senmori.mobmerge.condition.defaults.TamedEntityCondition;
-import net.senmori.mobmerge.condition.defaults.ValidEntityCondition;
-import net.senmori.mobmerge.condition.entity.ChargedCreeperCondition;
-import net.senmori.mobmerge.condition.entity.EntityCustomNameCondition;
-import net.senmori.mobmerge.condition.entity.EntityHasCustomNameCondition;
-import net.senmori.mobmerge.condition.entity.MatchDyeColorCondition;
+import net.senmori.mobmerge.annotation.DefaultCondition;
 import net.senmori.senlib.annotation.Excluded;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.NamespacedKey;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -31,28 +20,9 @@ public final class ConditionManager {
 
     private final BiMap<NamespacedKey, Condition> CONDITIONS = HashBiMap.create();
     private final BiMap<NamespacedKey, Condition> DEFAULT_CONDITIONS = HashBiMap.create();
-    private final Map<NamespacedKey, Class<? extends Condition>> CLASS_MAP = Maps.newHashMap();
-
-    // Default conditions
-    public final ValidEntityCondition VALID_ENTITY_CONDITION;
-    public final EntityTypeCondition ENTITY_TYPE_CONDITION;
-    public final EntityColorCondition ENTITY_COLOR_CONDITION;
-    public final EntityAgeCondition ENTITY_AGE_CONDITION;
-    public final LeashedEntityCondition LEASHED_ENTITY_CONDITION;
-    public final TamedEntityCondition TAMED_ENTITY_CONDITION;
 
     private ConditionManager() {
-        VALID_ENTITY_CONDITION = registerDefaultCondition(new ValidEntityCondition());
-        ENTITY_TYPE_CONDITION = registerDefaultCondition(new EntityTypeCondition());
-        ENTITY_COLOR_CONDITION = registerDefaultCondition(new EntityColorCondition());
-        ENTITY_AGE_CONDITION = registerDefaultCondition(new EntityAgeCondition());
-        LEASHED_ENTITY_CONDITION = registerDefaultCondition(new LeashedEntityCondition());
-        TAMED_ENTITY_CONDITION = registerDefaultCondition(new TamedEntityCondition());
 
-        registerCondition(new ChargedCreeperCondition());
-        registerCondition(new EntityCustomNameCondition());
-        registerCondition(new EntityHasCustomNameCondition());
-        registerCondition(new MatchDyeColorCondition());
     }
 
 
@@ -71,9 +41,8 @@ public final class ConditionManager {
     public <T extends Condition> T registerCondition(T condition) {
         Validate.notNull(condition, "Cannot register a null condition");
         Validate.isTrue(!isDefaultCondition(condition), "Cannot register a default condition as non-default");
-        Condition cond = CONDITIONS.putIfAbsent(condition.getKey(), condition);
-        Class clazz = CLASS_MAP.putIfAbsent(condition.getKey(), condition.getClass());
-        return (cond == null && clazz == null ? condition : null);
+        CONDITIONS.putIfAbsent(condition.getKey(), condition);
+        return condition;
     }
 
     /**
@@ -87,41 +56,30 @@ public final class ConditionManager {
         Validate.notNull(condition, "Cannot register a null condition");
         Validate.isTrue(isDefaultCondition(condition), "Cannot register a non-default condition as default");
         Condition cond = DEFAULT_CONDITIONS.putIfAbsent(condition.getKey(), condition);
-        Class clazz = CLASS_MAP.putIfAbsent(condition.getKey(), condition.getClass());
-        return (cond == null && clazz == null ? condition : null);
+        return condition;
     }
 
     /**
      * Gets the appropriate condition for the given key
      * @param key the key to check for
-     * @return the appropriate condition or null
+     * @return the appropriate condition or null if no condition exists by that name
      */
     @Nullable
     public Condition getCondition(NamespacedKey key) {
         if(DEFAULT_CONDITIONS.containsKey(key)) {
             return DEFAULT_CONDITIONS.get(key);
         }
-        return CONDITIONS.containsKey(key) ? CONDITIONS.get(key).clone() : null;
-    }
-
-    /**
-     * Get the condition class which belongs to the given NamespacedKey.
-     * @param key the key to check for
-     * @return the appropriate condition class, or null
-     */
-    @Nullable
-    public Class<? extends Condition> getConditionClass(NamespacedKey key) {
-        return CLASS_MAP.get(key);
+        return CONDITIONS.getOrDefault(key, null);
     }
 
     /**
      * Check if the given condition is a default condition.<br>
-     * A default condition is a condition which is excluded from serialization via the {@link Excluded} annotation.
+     * A default condition is a condition which is excluded from serialization via the {@link DefaultCondition} annotation.
      * @param condition the condition to check
      * @return true if the Condition is a default condition
      */
     public boolean isDefaultCondition(Condition condition) {
-        return condition.getClass().isAnnotationPresent(Excluded.class);
+        return condition.getClass().isAnnotationPresent(DefaultCondition.class);
     }
 
     /**

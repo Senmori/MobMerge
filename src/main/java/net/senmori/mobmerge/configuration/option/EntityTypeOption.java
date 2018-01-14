@@ -1,29 +1,30 @@
 package net.senmori.mobmerge.configuration.option;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.senmori.mobmerge.configuration.resolver.EntityTypeListResolver;
+import net.senmori.mobmerge.filter.EntityFilters;
+import net.senmori.mobmerge.filter.filters.LivingEntityFilter;
 import net.senmori.senlib.configuration.option.ListOption;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class EntityTypeOption extends ListOption<EntityType> {
+    private static final Pattern NEGATION_PATTERN = Pattern.compile("-");
     private static final EntityTypeListResolver resolver = new EntityTypeListResolver();
 
-    private boolean livingEntityWildcard = false;
+    private List<String> filters = Lists.newArrayList();
     public EntityTypeOption(String key) {
         super(key, Lists.newArrayList());
-        setWildcard(false);
         setResolver(resolver);
     }
 
     public EntityTypeOption(String key, List<EntityType> defaultTypes) {
         super(key, defaultTypes);
-        setWildcard(false);
     }
 
     @Override
@@ -40,68 +41,103 @@ public class EntityTypeOption extends ListOption<EntityType> {
             if (obj instanceof String) {
                 String str = (String) obj;
 
-                if (str.equalsIgnoreCase("living")) {
-                    setWildcard(true);
-                    populateLivingEntities(this.list);
+                boolean negated = false;
+                if(str.startsWith(NEGATION_PATTERN.pattern())) {
+                    // it's negated
+                    str = str.replaceFirst(NEGATION_PATTERN.pattern(), "");
+                    negated = true;
                 }
-
-                EntityType type = EntityType.fromName(str.toLowerCase());
-                if (type != null) {
-                    this.list.add(type);
+                if(EntityFilters.hasFilter(str)) {
+                    if(negated) {
+                        this.list.removeAll(EntityFilters.getFilter(str).getAllowedTypes());
+                    } else {
+                        this.list.addAll(EntityFilters.getFilter(str).getAllowedTypes());
+                    }
+                } else {
+                    EntityType type = EntityType.fromName(str.toLowerCase());
+                    if (type != null && type.isAlive()) {
+                        this.list.add(type);
+                    }
                 }
             }
         });
         this.list = this.list.stream().distinct().collect(Collectors.toList()); // filter duplicates
-        checkWildcard();
     }
 
     @Override
     public boolean load(FileConfiguration config) {
-        setWildcard(false);
         setList(resolver.resolve(config, getPath()));
 
-        checkWildcard();
+        List<String> filter = resolver.getFilters(config, getPath());
+        if(filter != null) {
+            this.filters = filter;
+        }
+
         return this.currentValue != null;
     }
 
     @Override
-    public void save(FileConfiguration config) {
+    public boolean save(FileConfiguration config) {
         config.set(getPath(), getStringList());
+        return true;
     }
 
     public List<String> getStringList() {
-        checkWildcard();
         List<String> result = Lists.newArrayList();
         List<EntityType> values = getValue();
-        if(isUsingWildcard()) {
-            result.add("living");
+
+        if(filters != null) {
+            for(String filter : filters) {
+                String s = filter;
+                if(filter.startsWith(NEGATION_PATTERN.pattern())) {
+                    s = filter.replaceFirst(NEGATION_PATTERN.pattern(), "");
+                }
+                if(EntityFilters.hasFilter(s)) {
+                    values.removeAll(EntityFilters.getFilter(s).getAllowedTypes());
+                } else {
+                    EntityType toRemove = EntityType.fromName(s);
+                    if(toRemove != null) {
+                        values.remove(toRemove);
+                    }
+                }
+                result.add(filter);
+            }
         }
+
         for(EntityType type : values) {
-            if(isUsingWildcard() && type.isAlive()) continue;
-            if(type.isAlive()) {
+            if(type != null && type.isAlive()) {
                 result.add(type.getName());
             }
         }
-        return result.stream().distinct().collect(Collectors.toList()); // remove duplicates
+        return result.stream().distinct().collect(Collectors.toList());
     }
 
-    public boolean isUsingWildcard() {
-        return livingEntityWildcard;
+    public EntityTypeListResolver getResolver() {
+        return resolver;
     }
 
-    public void setWildcard(boolean value) {
-        this.livingEntityWildcard = value;
+    public List<String> getFilters() {
+        return ImmutableList.copyOf(filters);
+    }
+
+    public void addFilter(String filterName) {
+        this.filters.add(filterName);
+    }
+
+    public void removeFilter(String filter) {
+        this.filters.remove(filter);
+    }
+
+    public void setFilters(List<String> filters) {
+        if(filters == null || filters.isEmpty()) {
+            this.filters = Lists.newArrayList(); // reset filters
+            return;
+        }
+        this.filters.clear();
+        this.filters.addAll(filters);
     }
 
     private void populateLivingEntities(List<EntityType> list) {
-        list.addAll(Arrays.stream(EntityType.values()).filter(EntityType::isAlive).collect(Collectors.toList()));
-    }
-
-    private void checkWildcard() {
-        List<EntityType> slave = Stream.of(EntityType.values()).filter(EntityType::isAlive).collect(Collectors.toList());
-        List<EntityType> master = this.list;
-        if(master.containsAll(slave)) {
-            setWildcard(true);
-        }
+        list.addAll(new LivingEntityFilter().getAllowedTypes());
     }
 }

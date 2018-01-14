@@ -6,21 +6,24 @@ import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.configuration.SettingsManager;
 import net.senmori.mobmerge.configuration.option.MobsSection;
 import net.senmori.senlib.configuration.ConfigOption;
+import net.senmori.senlib.configuration.IConfigurable;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 
 import java.util.Map;
 
-public final class EntityOptionManager {
+public final class EntityOptionManager implements IConfigurable {
     private final Map<EntityType, EntityMatcherOptions> matcherOptions = Maps.newHashMap();
     private final SettingsManager settingsManager;
     private final Map<String, ConfigOption> options = Maps.newHashMap();
 
-    public final MobsSection MOBS_SECTION = addOption("Mobs Section", new MobsSection("mobs"));
+    public final MobsSection MOBS_SECTION;
 
     public EntityOptionManager(SettingsManager settingsManager) {
         this.settingsManager = settingsManager;
+        MOBS_SECTION = settingsManager.MOBS_SECTION;
+        settingsManager.registerListener(this);
     }
 
     public <T extends ConfigOption> T addOption(String key, T option) {
@@ -31,7 +34,7 @@ public final class EntityOptionManager {
     public boolean load(FileConfiguration config) {
         if(!options.values().stream().allMatch(options -> options.load(config))) {
             if(settingsManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
-                MobMerge.LOG.warning("Failed to load mob section for EntityOptionManager");
+                MobMerge.LOG.warning("Failed to load options for EntityOptionManager");
                 return false; // mobs section isn't present; or it's not a section
             }
         }
@@ -68,8 +71,9 @@ public final class EntityOptionManager {
         return true;
     }
 
-    public void save(FileConfiguration config) {
+    public boolean save(FileConfiguration config) {
         matcherOptions.values().forEach(opt -> opt.save(config));
+        return true;
     }
 
     /**
