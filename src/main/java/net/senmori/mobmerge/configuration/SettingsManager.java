@@ -27,11 +27,12 @@ public class SettingsManager extends ConfigManager {
     public final BooleanOption VERBOSE = registerOption("Verbose", BooleanOption.newOption("verbose", true));
     public final WorldListOption EXCLUDED_WORLDS = registerOption("Excluded Worlds", WorldListOption.newOption("excluded-worlds", Lists.newArrayList()));
 
-
     public SettingsManager(JavaPlugin plugin, File configFile) {
         super(plugin, configFile);
         this.optionManager = new EntityOptionManager(this);
         this.conditionManager = ConditionManager.getInstance();
+        load(getConfig());
+        optionManager.load(getConfig());
     }
 
     public EntityOptionManager getEntityOptionManager() {

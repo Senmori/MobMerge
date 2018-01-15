@@ -8,7 +8,7 @@ import java.util.function.BiPredicate;
 /**
  * Represents a condition which is applied to two entities of the same type.<br>
  */
-public interface Condition extends Keyed, Cloneable, BiPredicate<Entity, Entity> {
+public interface Condition extends Keyed, BiPredicate<Entity, Entity> {
     /**
      * This compares two objects of the same type.
      * @param first the first object

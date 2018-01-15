@@ -4,7 +4,7 @@ import com.google.common.base.Predicate;
 
 import java.util.List;
 
-public interface Filter<T> extends Predicate<T> {
+public interface Filter<T, U> extends Predicate<U> {
 
     /**
      * Gets a list which contains the allowed types for this filter.

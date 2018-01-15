@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * This interface represents a list of {@link EntityType} that can be used to filter entities.
  */
-public interface EntityFilter extends Filter<EntityType> {
+public interface EntityFilter extends Filter<EntityType, Entity> {
 
     /**
      * A filter that only accepts hostile mobs.

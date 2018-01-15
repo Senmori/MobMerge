@@ -6,7 +6,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public class MobsSection extends SectionOption {
 
-    public final EntityTypeOption DEFAULT_MOBS = addOption("Default Mobs", new EntityTypeOption("default"));
+    public final EntityTypeOption DEFAULT_MOBS = addOption("Default Mobs", new EntityTypeOption("always-merge"));
 
     public final BooleanOption CUSTOM_NAME_VISIBLE = addOption("Custom Name Visible", new BooleanOption("custom-name-visible", true));
 

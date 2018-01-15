@@ -3,7 +3,7 @@ package net.senmori.mobmerge.condition;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
-import net.senmori.mobmerge.annotation.DefaultCondition;
+import net.senmori.mobmerge.annotation.EntityCondition;
 import net.senmori.senlib.annotation.Excluded;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.NamespacedKey;
@@ -65,21 +65,27 @@ public final class ConditionManager {
      * @return the appropriate condition or null if no condition exists by that name
      */
     @Nullable
-    public Condition getCondition(NamespacedKey key) {
-        if(DEFAULT_CONDITIONS.containsKey(key)) {
-            return DEFAULT_CONDITIONS.get(key);
+    public Condition getCondition(String key) {
+        if(DEFAULT_CONDITIONS.values().stream().anyMatch(condition -> condition.getKey().getKey().equals(key))) {
+            return DEFAULT_CONDITIONS.values().stream().filter(cond -> cond.getKey().getKey().equals(key))
+                    .findFirst().orElse(null);
         }
-        return CONDITIONS.getOrDefault(key, null);
+        return CONDITIONS.values().stream().filter(cond -> cond.getKey().getKey().equals(key)).findFirst().orElse(null);
     }
 
     /**
      * Check if the given condition is a default condition.<br>
-     * A default condition is a condition which is excluded from serialization via the {@link DefaultCondition} annotation.
+     * A default condition is a condition which is excluded from serialization via the {@link EntityCondition} annotation.
      * @param condition the condition to check
      * @return true if the Condition is a default condition
      */
     public boolean isDefaultCondition(Condition condition) {
-        return condition.getClass().isAnnotationPresent(DefaultCondition.class);
+        Class<? extends Condition> aClass = condition.getClass();
+        if(aClass.isAnnotationPresent(EntityCondition.class)) {
+            // test for default
+            return aClass.getAnnotation(EntityCondition.class).defaultCondition();
+        }
+        return false;
     }
 
     /**

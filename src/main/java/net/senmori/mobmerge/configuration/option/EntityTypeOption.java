@@ -88,14 +88,14 @@ public class EntityTypeOption extends ListOption<EntityType> {
 
         if(filters != null) {
             for(String filter : filters) {
-                String s = filter;
+                String sub = filter;
                 if(filter.startsWith(NEGATION_PATTERN.pattern())) {
-                    s = filter.replaceFirst(NEGATION_PATTERN.pattern(), "");
+                    sub = filter.replaceFirst(NEGATION_PATTERN.pattern(), "");
                 }
-                if(EntityFilters.hasFilter(s)) {
-                    values.removeAll(EntityFilters.getFilter(s).getAllowedTypes());
+                if(EntityFilters.hasFilter(sub)) {
+                    values.removeAll(EntityFilters.getFilter(sub).getAllowedTypes());
                 } else {
-                    EntityType toRemove = EntityType.fromName(s);
+                    EntityType toRemove = EntityType.fromName(sub);
                     if(toRemove != null) {
                         values.remove(toRemove);
                     }

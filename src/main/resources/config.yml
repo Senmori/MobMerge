@@ -3,29 +3,50 @@
 #   Interval: How often, in seconds, to search for entities. Values less than 1 will be reverted to 1.
 #   Count: The maximum number of entities to merge. -1 for infinite.
 #   Color: The ChatColor to merged mobs names to for easier distinction.
-#   Tag: The scoreboard tag to tag merged entities with.
+#   Tag: The scoreboard tag to tag merged entities with. (Currently not used)
 default:
   radius: 5   # That radius to search around every entity.
   interval: 3 # How often, in seconds, to search for entities to merge.
-  count: 65536 # The maximum number of entities that can be merged into a single 'merged entity'; -1 for infinite.
+  count: 256  # The maximum number of entities that can be merged into a single 'merged entity'; -1 for infinite.
   color: red   # The default ChatColor of the merged entity's nametag.
   tag: mergedEntity # What scoreboard tag to tag this entity with. Currently not used.
 
 # Which mobs to merge. This acts as a whitelist.
 # Use Minecraft names for these, not the names Bukkit's EntityType assigns them.
 # Default: Which mobs should always be merged.
-#   - Placeholders:
-#     - living -> for all living entities (cows, sheep, skeletons, etc.)
 mobs:
   custom-name-visible: true # If the entity's custom name (after being merged should be visible)
   default:
-    - hostile
+    - hostile_mobs # All hostile mobs should be merged
+    - passive_mobs # All passive mobs should be merged
+    - -villager  # Villagers are NOT merged.
   zombie:
     radius: [5, 3, 5]
+    count: 512
+
+# Which conditions should be enabled.
+# Conditions will return true if BOTH entities meet this condition.
+conditions:
+  slime-size: true # Slimes must be the same size, set to false to ignore size
+  horse-color: true # Horses must be the same color.
+  zombie-villager-profession: true # Zombie villagers must have the same profession
+  llama-color: true # Llama's must have the same color to be merged
+  parrot-color: true # Parrots must have the same color to be merged
+  has-custom-name:
+
+# These are conditions which will always run.
+# You should not mess with these conditions unless you know what they do.
+verify:
+  not-leashed: true
+  not-tamed: true
+  valid-entity: true
+  entity-type: true
+
 # Which worlds to not merge mobs in.
 # You can also use the UUID of a world.
 excluded-worlds:
   - world_nether
+  - world_the_end
 # If this plugin should be verbose about all errors. Not just major ones.
 # This could potentially spam your console. Please use caution when enabling this!
 verbose: false

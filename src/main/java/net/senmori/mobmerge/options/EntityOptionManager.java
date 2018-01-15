@@ -6,14 +6,13 @@ import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.configuration.SettingsManager;
 import net.senmori.mobmerge.configuration.option.MobsSection;
 import net.senmori.senlib.configuration.ConfigOption;
-import net.senmori.senlib.configuration.IConfigurable;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 
 import java.util.Map;
 
-public final class EntityOptionManager implements IConfigurable {
+public final class EntityOptionManager {
     private final Map<EntityType, EntityMatcherOptions> matcherOptions = Maps.newHashMap();
     private final SettingsManager settingsManager;
     private final Map<String, ConfigOption> options = Maps.newHashMap();
@@ -23,7 +22,6 @@ public final class EntityOptionManager implements IConfigurable {
     public EntityOptionManager(SettingsManager settingsManager) {
         this.settingsManager = settingsManager;
         MOBS_SECTION = settingsManager.MOBS_SECTION;
-        settingsManager.registerListener(this);
     }
 
     public <T extends ConfigOption> T addOption(String key, T option) {
@@ -48,9 +46,12 @@ public final class EntityOptionManager implements IConfigurable {
             matcherOptions.put(type, getOptionsFor(type));
         }
         for(String node : section.getKeys(false)) {
-            if((section.getCurrentPath() + "." + node).equals(MOBS_SECTION.getPath())) continue; // mobs.default == mobs.default
+            if((section.getCurrentPath() + config.options().pathSeparator() + node).equals(MOBS_SECTION.getPath())) continue; // mobs.default == mobs.default
             EntityType entityType = EntityType.fromName(node);
-            if(entityType == null || !entityType.isAlive()) {
+            if(entityType == null) {
+                continue; // it's another section
+            }
+            if(!entityType.isAlive()) {
                 if(settingsManager.VERBOSE.getValue() || MobMerge.isDebugMode()) {
                     MobMerge.LOG.warning("Invalid entity type registered: " + node);
                 }

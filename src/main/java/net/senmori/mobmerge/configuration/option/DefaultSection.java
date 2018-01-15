@@ -1,5 +1,6 @@
 package net.senmori.mobmerge.configuration.option;
 
+import net.senmori.senlib.annotation.RequiresReload;
 import net.senmori.senlib.configuration.option.ChatColorOption;
 import net.senmori.senlib.configuration.option.NumberOption;
 import net.senmori.senlib.configuration.option.SectionOption;
@@ -13,6 +14,7 @@ public class DefaultSection extends SectionOption {
 
     public final VectorOption RADIUS = addOption("Radius", new VectorOption("radius", new Vector(5, 5, 5)));
 
+    @RequiresReload(description = "This option requires a reload because of how BukkitTasks work.")
     public final NumberOption INTERVAL = addOption("Interval", new NumberOption("interval", 5));
     public final NumberOption MAX_COUNT = addOption("Max Count", new NumberOption("count", 5));
     public final ChatColorOption COLOR = addOption("Chat Color", new ChatColorOption("color", ChatColor.RED));

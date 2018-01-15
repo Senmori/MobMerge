@@ -204,8 +204,8 @@ public class EntityMatcherOptions {
 
     /**
      * Test two entities against all the conditions present.
-     * @param entity the first entity to test
-     * @param other the other entity to test
+     * @param entity the first entity to verify
+     * @param other the other entity to verify
      * @return
      */
     public boolean test(Entity entity, Entity other) {
