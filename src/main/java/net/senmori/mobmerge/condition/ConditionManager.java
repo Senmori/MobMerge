@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import net.senmori.mobmerge.annotation.EntityCondition;
+import net.senmori.mobmerge.condition.entity.CustomNameCondition;
 import net.senmori.mobmerge.condition.entity.HorseColorCondition;
 import net.senmori.mobmerge.condition.entity.LlamaColorCondition;
 import net.senmori.mobmerge.condition.entity.ParrotColorCondition;
@@ -46,6 +47,7 @@ public final class ConditionManager {
         registerCondition(new LlamaColorCondition());
         registerCondition(new ParrotColorCondition());
         registerCondition(new ZombieAgeCondition());
+        registerCondition(new CustomNameCondition());
     }
 
 
