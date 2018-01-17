@@ -4,12 +4,22 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import net.senmori.mobmerge.annotation.EntityCondition;
+import net.senmori.mobmerge.condition.entity.HorseColorCondition;
+import net.senmori.mobmerge.condition.entity.LlamaColorCondition;
+import net.senmori.mobmerge.condition.entity.ParrotColorCondition;
+import net.senmori.mobmerge.condition.entity.SlimeSizeCondition;
+import net.senmori.mobmerge.condition.entity.ZombieAgeCondition;
+import net.senmori.mobmerge.condition.entity.ZombieVillagerProfessionCondition;
+import net.senmori.mobmerge.condition.verify.NotLeashedCondition;
+import net.senmori.mobmerge.condition.verify.NotTamedCondition;
+import net.senmori.mobmerge.condition.verify.ValidEntityCondition;
+import net.senmori.mobmerge.condition.verify.ValidTypeCondition;
 import net.senmori.senlib.annotation.Excluded;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.NamespacedKey;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
@@ -18,11 +28,24 @@ import java.util.stream.Collectors;
 public final class ConditionManager {
     private static ConditionManager INSTANCE = new ConditionManager();
 
-    private final BiMap<NamespacedKey, Condition> CONDITIONS = HashBiMap.create();
-    private final BiMap<NamespacedKey, Condition> DEFAULT_CONDITIONS = HashBiMap.create();
+    private final BiMap<String, Condition> CONDITIONS = HashBiMap.create();
+    private final BiMap<String, Condition> DEFAULT_CONDITIONS = HashBiMap.create();
 
     private ConditionManager() {
+        // default conditions
+        registerDefaultCondition(new ValidEntityCondition());
+        registerDefaultCondition(new ValidTypeCondition());
+        registerDefaultCondition(new NotTamedCondition());
+        registerDefaultCondition(new NotLeashedCondition());
 
+
+        // regular conditions
+        registerCondition(new SlimeSizeCondition());
+        registerCondition(new HorseColorCondition());
+        registerCondition(new ZombieVillagerProfessionCondition());
+        registerCondition(new LlamaColorCondition());
+        registerCondition(new ParrotColorCondition());
+        registerCondition(new ZombieAgeCondition());
     }
 
 
@@ -41,7 +64,7 @@ public final class ConditionManager {
     public <T extends Condition> T registerCondition(T condition) {
         Validate.notNull(condition, "Cannot register a null condition");
         Validate.isTrue(!isDefaultCondition(condition), "Cannot register a default condition as non-default");
-        CONDITIONS.putIfAbsent(condition.getKey(), condition);
+        CONDITIONS.putIfAbsent(condition.getName(), condition);
         return condition;
     }
 
@@ -55,7 +78,7 @@ public final class ConditionManager {
     public <T extends Condition> T registerDefaultCondition(T condition) {
         Validate.notNull(condition, "Cannot register a null condition");
         Validate.isTrue(isDefaultCondition(condition), "Cannot register a non-default condition as default");
-        Condition cond = DEFAULT_CONDITIONS.putIfAbsent(condition.getKey(), condition);
+        Condition cond = DEFAULT_CONDITIONS.putIfAbsent(condition.getName(), condition);
         return condition;
     }
 
@@ -66,11 +89,11 @@ public final class ConditionManager {
      */
     @Nullable
     public Condition getCondition(String key) {
-        if(DEFAULT_CONDITIONS.values().stream().anyMatch(condition -> condition.getKey().getKey().equals(key))) {
-            return DEFAULT_CONDITIONS.values().stream().filter(cond -> cond.getKey().getKey().equals(key))
+        if(DEFAULT_CONDITIONS.values().stream().anyMatch(condition -> condition.getName().equals(key))) {
+            return DEFAULT_CONDITIONS.values().stream().filter(cond -> cond.getName().equals(key))
                     .findFirst().orElse(null);
         }
-        return CONDITIONS.values().stream().filter(cond -> cond.getKey().getKey().equals(key)).findFirst().orElse(null);
+        return CONDITIONS.values().stream().filter(cond -> cond.getName().equals(key)).findFirst().orElse(null);
     }
 
     /**
@@ -94,8 +117,8 @@ public final class ConditionManager {
      * @return the appropriate {@link NamespacedKey} or null
      */
     @Nullable
-    public NamespacedKey getKey(Condition condition) {
-        NamespacedKey key = null;
+    public String getKey(Condition condition) {
+        String key = null;
         if((key = DEFAULT_CONDITIONS.inverse().get(condition)) != null) {
             return key;
         }
@@ -107,7 +130,7 @@ public final class ConditionManager {
      * @param key the key to remove
      * @return true if the condition was successfully removed
      */
-    public boolean removeCondition(NamespacedKey key) {
+    public boolean removeCondition(String key) {
         return CONDITIONS.remove(key) != null;
     }
 
@@ -116,7 +139,7 @@ public final class ConditionManager {
      * @param conditions the list of conditions to sort
      * @return a sorted list of conditions
      */
-    public <T extends Condition> List<T> sortConditionsByPriority(List<T> conditions) {
+    public Collection<Condition> sortConditionsByPriority(Collection<Condition> conditions) {
         return conditions.stream().sorted(new ConditionComparator()).collect(Collectors.toList());
     }
 
@@ -124,7 +147,7 @@ public final class ConditionManager {
      * Gets a copy of the default conditions, sorted by their {@link Priority}
      * @return a sorted copy of the default conditions
      */
-    public List<Condition> getDefaultConditions() {
+    public Collection<Condition> getDefaultConditions() {
         return sortConditionsByPriority(Lists.newArrayList(DEFAULT_CONDITIONS.values())); // sort them
     }
 
@@ -132,7 +155,7 @@ public final class ConditionManager {
      * Gets a copy of all registered, non-default conditions, sorted by their {@link Priority}
      * @return a sorted copy of all registered, non-default conditions.
      */
-    public List<Condition> getConditions() {
+    public Collection<Condition> getConditions() {
         return sortConditionsByPriority(Lists.newArrayList(CONDITIONS.values()));
     }
 }

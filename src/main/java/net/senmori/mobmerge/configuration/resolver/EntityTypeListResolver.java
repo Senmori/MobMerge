@@ -25,8 +25,10 @@ public class EntityTypeListResolver extends ListResolver<EntityType> {
         List<EntityType> result = Lists.newArrayList();
         if(!config.contains(path)) return null; // empty list
         if(!config.isList(path)) {
-            // check for just 'living'
-            return getSingleNode(config, path);
+            if(MobMerge.getInstance().getSettingsManager().VERBOSE.getValue()) {
+                MobMerge.LOG.warning("Failed to load entity filters");
+            }
+            return null;
         }
 
         List<String> types = config.getStringList(path);
@@ -39,8 +41,10 @@ public class EntityTypeListResolver extends ListResolver<EntityType> {
         List<EntityType> result = Lists.newArrayList();
         if(!section.contains(path)) return result; // empty list
         if(!section.isList(path)) {
-            // check for just 'living'
-            return getSingleNode(section, path);
+            if(MobMerge.getInstance().getSettingsManager().VERBOSE.getValue()) {
+                MobMerge.LOG.warning("Failed to load entity filters");
+            }
+            return null;
         }
 
         List<String> types = section.getStringList(path);
@@ -51,8 +55,8 @@ public class EntityTypeListResolver extends ListResolver<EntityType> {
     private List<EntityType> populateList(List<String> list) {
         Set<EntityType> result = Sets.newHashSet();
         for(String s : list) {
-            if(EntityFilters.hasFilter(s)) {
-                result.addAll(EntityFilters.getFilter(s).getAllowedTypes());
+            if(EntityFilters.getInstance().hasFilter(s)) {
+                result.addAll(EntityFilters.getInstance().getFilter(s).getAllowedTypes());
                 continue; // found the filter; keep going
             }
             boolean negated = false;
@@ -61,13 +65,13 @@ public class EntityTypeListResolver extends ListResolver<EntityType> {
                 typeString = s.replaceFirst(NEGATION_PATTERN.pattern(), "");
                 negated = true;
             }
-            if(negated && EntityFilters.hasFilter(typeString)) {
-                result.removeAll(EntityFilters.getFilter(typeString).getAllowedTypes());
+            if(negated && EntityFilters.getInstance().hasFilter(typeString)) {
+                result.removeAll(EntityFilters.getInstance().getFilter(typeString).getAllowedTypes());
                 continue; // removed those entities
             }
             EntityType type = EntityType.fromName(typeString);
             if(type == null) {
-                continue;
+                continue; // it's a filter
             }
             if(negated && result.contains(type)) {
                 result.remove(type);
@@ -95,42 +99,19 @@ public class EntityTypeListResolver extends ListResolver<EntityType> {
     private List<String> getFilters(List<String> list) {
         List<String> result = Lists.newArrayList();
         for(String s : list) {
-            if(EntityFilters.hasFilter(s)) {
+            if(EntityFilters.getInstance().hasFilter(s)) {
                 result.add(s);
             } else if(s.startsWith(NEGATION_PATTERN.pattern())) {
-                result.add(s);
+                String temp = s.replaceFirst(NEGATION_PATTERN.pattern(), "");
+                if(EntityFilters.getInstance().hasFilter(temp) || EntityType.fromName(temp) != null) {
+                    result.add(s);
+                } else {
+                    if(MobMerge.getInstance().getSettingsManager().VERBOSE.getValue()) {
+                        MobMerge.LOG.warning("Invalid filter: " + s);
+                    }
+                }
             }
         }
         return result;
-    }
-
-    private List<EntityType> getSingleNode(FileConfiguration config, String path) {
-        if(!config.isList(path)) {
-            // check for just 'living'
-            if(config.isString(path)) {
-                return getEntityListFromNode(config.getString(path));
-            } else {
-                MobMerge.LOG.warning("Expected " + this.getValueClass() + ", but found " + config.get(path).getClass() + ".");
-                return null;
-            }
-        }
-        return Lists.newArrayList();
-    }
-
-    private List<EntityType> getSingleNode(ConfigurationSection section, String path) {
-        if(!section.isList(path)) {
-            // check for just 'living'
-            if(section.isString(path)) {
-                return getEntityListFromNode(section.getString(path));
-            } else {
-                MobMerge.LOG.warning("Expected " + this.getValueClass() + ", but found " + section.get(path).getClass() + ".");
-                return null;
-            }
-        }
-        return Lists.newArrayList();
-    }
-
-    private List<EntityType> getEntityListFromNode(String node) {
-        return EntityFilters.hasFilter(node) ? EntityFilters.getFilter(node).getAllowedTypes() : null;
     }
 }

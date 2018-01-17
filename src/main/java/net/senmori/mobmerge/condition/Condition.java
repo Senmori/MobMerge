@@ -1,6 +1,5 @@
 package net.senmori.mobmerge.condition;
 
-import org.bukkit.Keyed;
 import org.bukkit.entity.Entity;
 
 import java.util.function.BiPredicate;
@@ -8,7 +7,7 @@ import java.util.function.BiPredicate;
 /**
  * Represents a condition which is applied to two entities of the same type.<br>
  */
-public interface Condition extends Keyed, BiPredicate<Entity, Entity> {
+public interface Condition extends BiPredicate<Entity, Entity> {
     /**
      * This compares two objects of the same type.
      * @param first the first object
@@ -25,5 +24,7 @@ public interface Condition extends Keyed, BiPredicate<Entity, Entity> {
      * @return the condition's priority
      */
     Priority getPriority();
+
+    String getName();
 
 }

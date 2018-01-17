@@ -9,7 +9,6 @@ import net.senmori.mobmerge.condition.Condition;
 import net.senmori.mobmerge.condition.ConditionManager;
 import net.senmori.mobmerge.condition.Priority;
 import net.senmori.mobmerge.configuration.SettingsManager;
-import net.senmori.mobmerge.configuration.option.ConditionSection;
 import net.senmori.senlib.configuration.ConfigOption;
 import net.senmori.senlib.configuration.option.ChatColorOption;
 import net.senmori.senlib.configuration.option.NumberOption;
@@ -24,7 +23,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 @SuppressWarnings("deprecation")
@@ -39,8 +37,6 @@ public class EntityMatcherOptions {
     private final EntityOptionManager optionManager;
     private final ConditionManager conditionManager = ConditionManager.getInstance();
 
-    private final ConditionSection conditionSection;
-
     // options
     private final VectorOption RADIUS;
     private final NumberOption COUNT;
@@ -54,7 +50,6 @@ public class EntityMatcherOptions {
         this.formattedTypeName = WordUtils.capitalizeFully(this.typeName.replaceAll("_", " ").toLowerCase());
         this.settingsManager = settingsManager;
         this.optionManager = settingsManager.getEntityOptionManager();
-        this.conditionSection = settingsManager.CONDITIONS_SECTION;
         conditions.addAll(conditionManager.getDefaultConditions());
 
         RADIUS = addOption(this.formattedTypeName + " Radius", new VectorOption("radius", settingsManager.DEFAULT_SECTION.RADIUS.getValue()));
@@ -137,14 +132,14 @@ public class EntityMatcherOptions {
     }
 
     public boolean load(FileConfiguration config) {
-        String MOBS_KEY = optionManager.MOBS_SECTION.getPath();
+        String MOBS_KEY = settingsManager.MOBS_SECTION.getPath();
         ConfigurationSection mobSection = config.getConfigurationSection(MOBS_KEY);
         if(mobSection == null) {
             MobMerge.LOG.warning("Expected configuration section at " + MOBS_KEY + ". Found " + config.get(MOBS_KEY).getClass().getName());
             return false;
         }
         ConfigurationSection typeSection = mobSection.getConfigurationSection(this.typeName);
-        String path = MOBS_KEY + "." + this.typeName;
+        String path = MOBS_KEY + config.options().pathSeparator() + this.typeName;
         if(typeSection == null) {
             MobMerge.LOG.warning("Expected section at " + path + ". Found null");
             return false;
@@ -153,7 +148,7 @@ public class EntityMatcherOptions {
         // we are already at "mobs.<type>"
         // e.g. mobs.zombie.<node> <-- currently at 'node'
         for(String node : typeSection.getKeys(false)) {
-            if (! typeSection.isConfigurationSection(node)) {
+            if (!typeSection.isConfigurationSection(node)) {
                 // it's not a 'conditions' node
                 // check for radius, count, color
                 if (node.equals(COUNT.getPath())) {
@@ -167,37 +162,24 @@ public class EntityMatcherOptions {
                 RADIUS.setValue(RADIUS.getResolver().resolve(typeSection, RADIUS.getPath()));
             }
         }
-        MobMerge.debug("Loaded options for " + WordUtils.capitalizeFully(this.typeName.replaceAll("_", " ")));
         return true;
     }
 
     public void save(FileConfiguration config) {
-        String path = optionManager.MOBS_SECTION.getPath() + "." + this.typeName;
-
-        ConfigurationSection section = config.getConfigurationSection(path);
-
-        for(ConfigOption opt : options.values()) {
-            if(opt instanceof ChatColorOption) {
-                section.set(opt.getPath(), ( (ChatColorOption) opt ).getValue().name().toLowerCase(Locale.ENGLISH));
-                continue;
+        ConfigurationSection section = settingsManager.MOBS_SECTION.getSection();
+        if(section == null) {
+            section = config.createSection(settingsManager.MOBS_SECTION.getPath());
+            if(settingsManager.VERBOSE.getValue()) {
+                MobMerge.LOG.warning(settingsManager.MOBS_SECTION.getPath() + " section is missing! Creating it now...");
             }
-            section.set(opt.getPath(), opt.getValue());
+            settingsManager.MOBS_SECTION.save(config);
         }
 
-        if(!conditions.isEmpty()) {
-            ConfigurationSection condSection = section.getConfigurationSection(conditionSection.getPath());
-            if(condSection == null) {
-                condSection = section.createSection(conditionSection.getPath());
-                MobMerge.debug("Created empty conditions section for " + section.getCurrentPath());
-            }
-            for(Condition con : this.conditions) {
-                if(conditionManager.isDefaultCondition(con)) continue; // skip default conditions
-                NamespacedKey conditionKey = conditionManager.getKey(con);
-                if(conditionKey == null || conditionKey.toString().isEmpty()) {
-                    if(settingsManager.VERBOSE.getValue()) {
-                        MobMerge.LOG.warning("Unknown condition \'" + con.getClass().getName() + "\'. Could not find matching NamespacedKey.");
-                    }
-                }
+        for(ConfigOption opt : options.values()) {
+            if(opt.hasResolver()) {
+                opt.getResolver().save(section, opt.getPath(), opt.getValue());
+            } else {
+                section.set(opt.getPath(), opt.getValue());
             }
         }
     }
@@ -242,11 +224,11 @@ public class EntityMatcherOptions {
      * @param key the key of the condition that should be removed
      * @return true if the condition was successfully removed.
      */
-    public boolean removeCondition(NamespacedKey key) {
+    public boolean removeCondition(String key) {
         return this.conditions
                        .stream()
                        .filter(condition -> !conditionManager.isDefaultCondition(condition))
-                       .filter(condition -> condition.getKey().equals(key))
+                       .filter(condition -> condition.getName().equals(key))
                        .findFirst()
                        .map(condition -> this.conditions.remove(condition))
                        .orElse(false);
@@ -269,6 +251,6 @@ public class EntityMatcherOptions {
      * @return an immutable copy of the conditions
      */
     public List<Condition> getConditions() {
-        return ImmutableList.copyOf(conditionManager.sortConditionsByPriority(this.conditions));
+        return ImmutableList.copyOf(conditionManager.sortConditionsByPriority(settingsManager.CONDITIONS_SECTION.getEnabledConditions()));
     }
 }

@@ -1,9 +1,7 @@
 package net.senmori.mobmerge.condition.verify;
 
-import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.annotation.EntityCondition;
 import net.senmori.mobmerge.condition.Priority;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 
 /**
@@ -17,12 +15,12 @@ public class ValidEntityCondition extends DefaultCondition {
     }
 
     @Override
-    public NamespacedKey getKey() {
-        return MobMerge.newKey("valid-entity");
+    public Priority getPriority() {
+        return Priority.DEFAULT;
     }
 
     @Override
-    public Priority getPriority() {
-        return Priority.DEFAULT;
+    public String getName() {
+        return "valid-entity";
     }
 }

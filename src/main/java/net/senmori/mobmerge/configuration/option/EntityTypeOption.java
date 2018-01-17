@@ -47,11 +47,11 @@ public class EntityTypeOption extends ListOption<EntityType> {
                     str = str.replaceFirst(NEGATION_PATTERN.pattern(), "");
                     negated = true;
                 }
-                if(EntityFilters.hasFilter(str)) {
+                if(EntityFilters.getInstance().hasFilter(str)) {
                     if(negated) {
-                        this.list.removeAll(EntityFilters.getFilter(str).getAllowedTypes());
+                        this.list.removeAll(EntityFilters.getInstance().getFilter(str).getAllowedTypes());
                     } else {
-                        this.list.addAll(EntityFilters.getFilter(str).getAllowedTypes());
+                        this.list.addAll(EntityFilters.getInstance().getFilter(str).getAllowedTypes());
                     }
                 } else {
                     EntityType type = EntityType.fromName(str.toLowerCase());
@@ -72,7 +72,6 @@ public class EntityTypeOption extends ListOption<EntityType> {
         if(filter != null) {
             this.filters = filter;
         }
-
         return this.currentValue != null;
     }
 
@@ -92,8 +91,8 @@ public class EntityTypeOption extends ListOption<EntityType> {
                 if(filter.startsWith(NEGATION_PATTERN.pattern())) {
                     sub = filter.replaceFirst(NEGATION_PATTERN.pattern(), "");
                 }
-                if(EntityFilters.hasFilter(sub)) {
-                    values.removeAll(EntityFilters.getFilter(sub).getAllowedTypes());
+                if(EntityFilters.getInstance().hasFilter(sub)) {
+                    values.removeAll(EntityFilters.getInstance().getFilter(sub).getAllowedTypes());
                 } else {
                     EntityType toRemove = EntityType.fromName(sub);
                     if(toRemove != null) {

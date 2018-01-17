@@ -1,8 +1,6 @@
 package net.senmori.mobmerge.condition.verify;
 
-import net.senmori.mobmerge.MobMerge;
 import net.senmori.mobmerge.annotation.EntityCondition;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
@@ -17,7 +15,7 @@ public class NotLeashedCondition extends DefaultCondition {
     }
 
     @Override
-    public NamespacedKey getKey() {
-        return MobMerge.newKey("not-leashed");
+    public String getName() {
+        return "not-leased";
     }
 }

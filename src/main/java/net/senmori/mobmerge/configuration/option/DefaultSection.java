@@ -16,7 +16,7 @@ public class DefaultSection extends SectionOption {
 
     @RequiresReload(description = "This option requires a reload because of how BukkitTasks work.")
     public final NumberOption INTERVAL = addOption("Interval", new NumberOption("interval", 5));
-    public final NumberOption MAX_COUNT = addOption("Max Count", new NumberOption("count", 5));
+    public final NumberOption MAX_COUNT = addOption("Max Count", new NumberOption("count", 256));
     public final ChatColorOption COLOR = addOption("Chat Color", new ChatColorOption("color", ChatColor.RED));
     public final StringOption ENTITY_TAG = addOption("Entity Tag", new StringOption("tag", "mergedEntity"));
 

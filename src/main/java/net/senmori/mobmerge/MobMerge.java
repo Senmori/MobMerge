@@ -3,6 +3,7 @@ package net.senmori.mobmerge;
 import io.netty.util.internal.StringUtil;
 import net.senmori.mobmerge.configuration.SettingsManager;
 import net.senmori.mobmerge.listener.EntityListener;
+import net.senmori.mobmerge.options.EntityOptionManager;
 import net.senmori.mobmerge.tasks.ProcessWorldsTask;
 import net.senmori.mobmerge.util.MobLogger;
 import org.bukkit.Bukkit;
@@ -22,6 +23,7 @@ public class MobMerge extends JavaPlugin {
     }
 
     private SettingsManager settingsManager;
+    private EntityOptionManager entityOptionManager;
     private ProcessWorldsTask processWorldsTask;
 
     @Override
@@ -35,6 +37,7 @@ public class MobMerge extends JavaPlugin {
         this.saveDefaultConfig();
 
         settingsManager = new SettingsManager(this, new File(getDataFolder(), "config.yml"));
+        //settingsManager.load();
 
         processWorldsTask = new ProcessWorldsTask(settingsManager);
         new EntityListener(settingsManager);
@@ -43,7 +46,7 @@ public class MobMerge extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        settingsManager.save();
+        settingsManager.save(settingsManager.getConfig());
     }
 
     public static NamespacedKey newKey(String key) {
