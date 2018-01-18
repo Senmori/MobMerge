@@ -27,6 +27,8 @@ public class ConditionSection extends SectionOption {
         addOption("Zombie Villager Profession", new ConditionOption("zombie-villager-profession", true));
         addOption("Llama Color", new ConditionOption("llama-color", true));
         addOption("Parrot Color", new ConditionOption("parrot-color", true));
+        addOption("Zombie Age", new ConditionOption("zombie-age", true));
+        addOption("No Custom Age", new ConditionOption("no-custom-name", true));
     }
 
     @Override
@@ -35,7 +37,6 @@ public class ConditionSection extends SectionOption {
         for(ConfigOption option : getOptions().values()) {
             if(option instanceof ConditionOption) {
                 ConditionOption condOption = (ConditionOption)option;
-                MobMerge.debug("Condition Option: " + condOption + " -> " + condOption.isEnabled());
 
                 boolean enabled = condOption.isEnabled();
 
