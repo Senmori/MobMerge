@@ -45,12 +45,14 @@ public class SettingsManager extends ConfigManager {
 
     @Override
     public boolean load(FileConfiguration configuration) {
-        return getOptions().values().stream().allMatch(opt -> opt.load(configuration)) && optionManager.load(configuration);
+        optionManager.load(configuration);
+        return getOptions().values().stream().allMatch(opt -> opt.load(configuration));
     }
 
     @Override
     public boolean save(FileConfiguration configuration) {
-        return getOptions().values().stream().allMatch(opt -> opt.save(configuration)) && optionManager.save(configuration);
+        optionManager.save(configuration);
+        return getOptions().values().stream().allMatch(opt -> opt.save(configuration));
     }
 
     public EntityOptionManager getEntityOptionManager() {

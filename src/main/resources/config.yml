@@ -32,15 +32,7 @@ conditions:
   zombie-villager-profession: true # Zombie villagers must have the same profession
   llama-color: true # Llama's must have the same color to be merged
   parrot-color: true # Parrots must have the same color to be merged
-  has-custom-name:
-
-# These are conditions which will always run.
-# You should not mess with these conditions unless you know what they do.
-verify:
-  not-leashed: true
-  not-tamed: true
-  valid-entity: true
-  entity-type: true
+  no-custom-name: true # Entities must not have a custom name to be merged.
 
 # Which worlds to not merge mobs in.
 # You can also use the UUID of a world.

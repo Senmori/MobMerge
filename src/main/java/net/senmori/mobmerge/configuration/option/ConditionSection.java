@@ -28,7 +28,7 @@ public class ConditionSection extends SectionOption {
         addOption("Llama Color", new ConditionOption("llama-color", true));
         addOption("Parrot Color", new ConditionOption("parrot-color", true));
         addOption("Zombie Age", new ConditionOption("zombie-age", true));
-        addOption("No Custom Age", new ConditionOption("no-custom-name", true));
+        addOption("No Custom Name", new ConditionOption("no-custom-name", true));
     }
 
     @Override
@@ -41,6 +41,11 @@ public class ConditionSection extends SectionOption {
                 boolean enabled = condOption.isEnabled();
 
                 Condition condition = conditionManager.getCondition(condOption.getConditionName());
+                if(condition == null) {
+                    if(MobMerge.getInstance().getSettingsManager().VERBOSE.getValue()) {
+                        MobMerge.LOG.warning("Failed to find condition with name \'" + condOption.getConditionName() + "\'");
+                    }
+                }
                 if(enabled && condition != null && !conditionManager.isDefaultCondition(condition)) {
                     enabledConditions.add(condition);
                     MobMerge.debug("Enabled condition: " + condition.getName());
